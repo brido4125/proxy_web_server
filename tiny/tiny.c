@@ -29,15 +29,16 @@ int main(int argc, char **argv) {
   }
 
   listenfd = Open_listenfd(argv[1]);
-    printf("port : %s", port);
+
   while (1) {
-    clientlen = sizeof(clientaddr);
-    connfd = Accept(listenfd, (SA *)&clientaddr,&clientlen);  // line:netp:tiny:accept
-    Getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE,0);
-    printf("Accepted connection from (%s, %s)\n", hostname, port);
-    doit(connfd);   // line:netp:tiny:doit
-    Close(connfd);  // line:netp:tiny:close
-    printf("Closed connection from (%s, %s)\n", hostname, port);
+      printf("port : %s\n", port);
+      clientlen = sizeof(clientaddr);
+      connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);  // line:netp:tiny:accept
+      Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
+      printf("Accepted connection from (%s, %s)\n", hostname, port);
+      doit(connfd);   // line:netp:tiny:doit
+      Close(connfd);  // line:netp:tiny:close
+      printf("Closed connection from (%s, %s)\n", hostname, port);
   }
 }
 
