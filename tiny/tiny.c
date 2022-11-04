@@ -35,9 +35,9 @@ int main(int argc, char **argv) {
       connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);  // line:netp:tiny:accept
       Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
       printf("Accepted connection from (%s, %s)\n", hostname, port);
-      if (hostname == "127.0.0.1" || hostname == "3.36.100.140") {
-          Close(connfd);
-      }
+      /*
+       * / 요청이 아닌 경우, 임의의 connection이 생긴다.
+       * */
       doit(connfd);   // line:netp:tiny:doit
       Close(connfd);  // line:netp:tiny:close
       printf("port : %s\n", port);
