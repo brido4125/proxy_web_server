@@ -32,7 +32,8 @@ int main(int argc, char **argv) {
 
   while (1) {
       clientlen = sizeof(clientaddr);
-      connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);  // line:netp:tiny:accept
+      connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);
+      printf("connection fd : %d", (int) connfd);
       Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
       printf("Accepted connection from (%s, %s)\n", hostname, port);
       /*
