@@ -17,8 +17,6 @@ void serve_dynamic(int fd, char *filename, char *cgiargs);
 void clienterror(int fd, char *cause, char *errnum, char *shortmsg,char *longmsg);
 
 
-static int privFd;
-
 int main(int argc, char **argv) {
   int listenfd, connfd;
   char hostname[MAXLINE], port[MAXLINE];
@@ -36,9 +34,6 @@ int main(int argc, char **argv) {
   while (1) {
       clientlen = sizeof(clientaddr);
       connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);
-      if (connfd == privFd) {
-          connfd += 1;
-      }
       printf("connection fd : %d\n", (int) connfd);
       Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
       printf("Accepted connection from (%s, %s)\n", hostname, port);
@@ -49,7 +44,6 @@ int main(int argc, char **argv) {
       Close(connfd);  // line:netp:tiny:close
       printf("port : %s\n", port);
       printf("Closed connection from (%s, %s)\n", hostname, port);
-      privFd = connfd;
   }
 }
 
