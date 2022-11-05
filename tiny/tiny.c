@@ -51,6 +51,7 @@ int main(int argc, char **argv) {
  * 한개의 HTTP 트랜잭션을 처리
  * */
 void doit(int fd){
+    printf("do it start\n");
     int is_static;//현재 들어온 HTTP 요청이 정적인지 동적인지 판단
     struct stat sbuf;//HTTP 요청으로 들어온 file에 대한 정보를 저장하는 구조체
     char buf[MAXLINE],method[MAXLINE],uri[MAXLINE],version[MAXLINE];
