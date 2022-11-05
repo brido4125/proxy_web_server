@@ -872,6 +872,7 @@ ssize_t rio_readnb(rio_t *rp, void *usrbuf, size_t n)
 /* $begin rio_readlineb */
 ssize_t rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen) 
 {
+    printf("rio_readlineb start\n");
     int n, rc;
     char c, *bufp = usrbuf;
 
