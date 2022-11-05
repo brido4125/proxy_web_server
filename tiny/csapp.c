@@ -915,7 +915,9 @@ void Rio_writen(int fd, void *usrbuf, size_t n)
 
 void Rio_readinitb(rio_t *rp, int fd)
 {
+    printf("Rio_readinitb start\n");
     rio_readinitb(rp, fd);
+    printf("Rio_readinitb end\n");
 } 
 
 ssize_t Rio_readnb(rio_t *rp, void *usrbuf, size_t n) 
