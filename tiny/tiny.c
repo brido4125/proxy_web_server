@@ -143,6 +143,7 @@ int parse_uri(char *uri, char *filename, char *cgiargs){
         strcat(filename,uri);
         if (uri[strlen(uri) - 1] == '/') {
             strcat(filename, "home.html");
+            printf("parseFileName : %s\n", filename);
         }
         return 1;
     }
