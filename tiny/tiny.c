@@ -57,7 +57,7 @@ void doit(int fd){
     char buf[MAXLINE],method[MAXLINE],uri[MAXLINE],version[MAXLINE];
     char filename[MAXLINE], cgiargs[MAXLINE];
     rio_t rio;
-
+    printf("do it set local vars\n");
     /*
      * HTTP 요청을 읽음(HTTP 헤더 파싱)
      * */
