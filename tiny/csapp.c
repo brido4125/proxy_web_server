@@ -931,6 +931,7 @@ ssize_t Rio_readnb(rio_t *rp, void *usrbuf, size_t n)
 
 ssize_t Rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen) 
 {
+    printf("Rio_readlineb start\n");
     ssize_t rc;
 
     if ((rc = rio_readlineb(rp, usrbuf, maxlen)) < 0)
