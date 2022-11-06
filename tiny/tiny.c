@@ -51,26 +51,20 @@ int main(int argc, char **argv) {
  * 한개의 HTTP 트랜잭션을 처리
  * */
 void doit(int fd){
-    printf("do it start\n");
     int is_static;//현재 들어온 HTTP 요청이 정적인지 동적인지 판단
     struct stat sbuf;//HTTP 요청으로 들어온 file에 대한 정보를 저장하는 구조체
     char buf[MAXLINE],method[MAXLINE],uri[MAXLINE],version[MAXLINE];
     char filename[MAXLINE], cgiargs[MAXLINE];
     rio_t rio;
-    printf("do it set local vars\n");
     /*
      * HTTP 요청을 읽음(HTTP 헤더 파싱)
      * */
     Rio_readinitb(&rio, fd);
-    printf("rio->rio.cnt : %d\n", rio.rio_cnt);
     /* buffer 비우기 */
     if (rio.rio_buf[0] != '\0') {
         rio.rio_buf[0] = '\0';
     }
-    printf("rio->buffer before set : %s\n", rio.rio_buf);
     Rio_readlineb(&rio, buf, MAXLINE);
-    printf("rio->buffer after set : %s\n", rio.rio_buf);
-    printf("Rio_readlineb end\n");
     printf("Request headers:\n");
     printf("%s", buf);
     sscanf(buf, "%s %s %s", method, uri, version);
@@ -217,7 +211,11 @@ void get_filetype(char *filename, char *filetype){
     else if (strstr(filename, ".jpg")) {
         strcpy(filetype, "image/jpeg");
     }
-    /* File Type : 무형식 텍스트 파일*/
+    /* 11.7 동영상 처리*/
+    else if (strstr(filename, ".mpg")) {
+        strcpy(filetype, "video/mpeg");
+    }
+        /* File Type : 무형식 텍스트 파일*/
     else {
         strcpy(filetype, "text/plain");
     }
