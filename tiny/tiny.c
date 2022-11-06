@@ -61,6 +61,7 @@ void doit(int fd){
     /*
      * HTTP 요청을 읽음(HTTP 헤더 파싱)
      * */
+    printf("rio->rio.cnt : %d\n", rio.rio_cnt);
     Rio_readinitb(&rio, fd);
     Rio_readlineb(&rio, buf, MAXLINE);
     printf("Rio_readlineb end\n");

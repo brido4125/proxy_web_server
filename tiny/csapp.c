@@ -804,12 +804,9 @@ ssize_t rio_writen(int fd, void *usrbuf, size_t n)
 /* $begin rio_read */
 static ssize_t rio_read(rio_t *rp, char *usrbuf, size_t n)
 {
-    printf("rio_read start\n");
 
     int cnt;
-    printf("rp->rio_cnt : %d\n", rp->rio_cnt);
     while (rp->rio_cnt <= 0) {  /* Refill if buf is empty */
-        printf("rio_read while\n");
         rp->rio_cnt = read(rp->rio_fd, rp->rio_buf,sizeof(rp->rio_buf));
 	if (rp->rio_cnt < 0) {
 	    if (errno != EINTR) /* Interrupted by sig handler return */
@@ -820,7 +817,6 @@ static ssize_t rio_read(rio_t *rp, char *usrbuf, size_t n)
 	else 
 	    rp->rio_bufptr = rp->rio_buf; /* Reset buffer ptr */
     }
-    printf("rio_read outside while\n");
     /* Copy min(n, rp->rio_cnt) bytes from internal buf to user buf */
     cnt = n;          
     if (rp->rio_cnt < n)   
@@ -838,11 +834,9 @@ static ssize_t rio_read(rio_t *rp, char *usrbuf, size_t n)
 /* $begin rio_readinitb */
 void rio_readinitb(rio_t *rp, int fd) 
 {
-    printf("rio_readinitb start\n");
-    rp->rio_fd = fd;  
+    rp->rio_fd = fd;
     rp->rio_cnt = 0;  
     rp->rio_bufptr = rp->rio_buf;
-    printf("rio_readinitb end\n");
 }
 /* $end rio_readinitb */
 
