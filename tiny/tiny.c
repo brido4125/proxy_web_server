@@ -11,7 +11,8 @@
 void doit(int fd);
 void read_requesthdrs(rio_t *rp);
 int parse_uri(char *uri, char *filename, char *cgiargs);
-void serve_static(int fd, char *filename, int filesize);
+void serve_static_get(int fd, char *filename, int filesize);
+void serve_static_head(int fd, char *filename, int filesize);
 void get_filetype(char *filename, char *filetype);
 void serve_dynamic(int fd, char *filename, char *cgiargs);
 void clienterror(int fd, char *cause, char *errnum, char *shortmsg,char *longmsg);
@@ -65,10 +66,13 @@ void doit(int fd){
         rio.rio_buf[0] = '\0';
     }
     Rio_readlineb(&rio, buf, MAXLINE);
-    printf("Request headers:\n");
-    printf("%s", buf);
     sscanf(buf, "%s %s %s", method, uri, version);
-    if (strcasecmp(method, "GET") && strcasecmp(method,"HEAD")) {
+    printf("method : %s\n", method);
+    int getFlag = strcasecmp(method, "GET");
+    int headFlag = strcasecmp(method, "HEAD");
+    printf("getFlag = %d\n", getFlag);
+    printf("headFlag = %d\n", headFlag);
+    if (getFlag && headFlag) {
         clienterror(fd, method, "501", "Not Implemented", "this method is not implement");
         return;
     }
@@ -90,7 +94,12 @@ void doit(int fd){
             clienterror(fd, filename, "403", "Forbidden", "Sever could not read the file");
             return;
         }
-        serve_static(fd, filename, sbuf.st_size);
+        if (headFlag!= 0) {
+            serve_static_head(fd, filename, sbuf.st_size);
+        } else if (getFlag != 0) {
+            serve_static_get(fd, filename, sbuf.st_size);
+        }
+
     }
     /*
      * 동적 컨텐츠 요청
@@ -169,15 +178,12 @@ int parse_uri(char *uri, char *filename, char *cgiargs){
     }
 }
 
-
-void serve_static(int fd, char *filename, int filesize){
-    int srcfd;
-    char *srcp, filetype[MAXLINE], buf[MAXBUF];
-
+void serve_static_head(int fd, char *filename, int filesize){
+    char filetype[MAXLINE], buf[MAXBUF];
 
     /* Send Response 헤더 */
     get_filetype(filename, filetype);
-    sprintf(buf,"HTTP/1.0 200 OK\r\n");
+    sprintf(buf,"HTTP/1.0 200 OK\r\n");//시작줄 설정
     sprintf(buf,"%sServer: Tiny Web Server\r\n",buf);
     sprintf(buf,"%sConnection: close\r\n",buf);
     sprintf(buf,"%sContent-length: %d\r\n",buf,filesize);
@@ -185,6 +191,16 @@ void serve_static(int fd, char *filename, int filesize){
     Rio_writen(fd, buf, strlen(buf));
     printf("Response headers:\n");
     printf("%s", buf);
+}
+
+
+
+void serve_static_get(int fd, char *filename, int filesize){
+    int srcfd;
+    char *srcp;
+
+
+    serve_static_head(fd, filename, filesize);
 
     /* Send response body to client*/
     srcfd = Open(filename, O_RDONLY, 0);
