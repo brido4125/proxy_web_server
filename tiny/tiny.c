@@ -79,8 +79,8 @@ void doit(int fd){
      * Parse URI form GET 요청
      * */
     is_static = parse_uri(uri, filename, cgiargs);
-    printf("stat : %d\n",stat(filename, &sbuf));
     if (stat(filename, &sbuf) < 0) { // 들어온 파일이 로컬 디스크 상에 없을 경우 에러내고 리턴
+        printf("filename : %s\n",filename);
         clienterror(fd, filename, "404", "NOT FOUND", "Server could not find this file");
         return;
     }
