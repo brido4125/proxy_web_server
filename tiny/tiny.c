@@ -68,7 +68,7 @@ void doit(int fd){
     printf("Request headers:\n");
     printf("%s", buf);
     sscanf(buf, "%s %s %s", method, uri, version);
-    if (strcasecmp(method, "GET")) {
+    if (strcasecmp(method, "GET") || strcasecmp(method, "HEAD")) {
         clienterror(fd, method, "501", "Not Implemented", "this method is not implement");
         return;
     }
@@ -215,8 +215,8 @@ void get_filetype(char *filename, char *filetype){
         strcpy(filetype, "image/jpeg");
     }
     /* 11.7 동영상 처리*/
-    else if (strstr(filename, ".mpg")) {
-        strcpy(filetype, "video/mpeg");
+    else if (strstr(filename, ".mp4")) {
+        strcpy(filetype, "video/mp4");
     }
         /* File Type : 무형식 텍스트 파일*/
     else {
