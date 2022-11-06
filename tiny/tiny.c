@@ -72,7 +72,7 @@ void doit(int fd){
     int headFlag = strcasecmp(method, "HEAD");
     printf("getFlag = %d\n", getFlag);
     printf("headFlag = %d\n", headFlag);
-    if (getFlag && headFlag) {
+    if (getFlag != 0 && headFlag != 0) {
         clienterror(fd, method, "501", "Not Implemented", "this method is not implement");
         return;
     }
@@ -94,9 +94,9 @@ void doit(int fd){
             clienterror(fd, filename, "403", "Forbidden", "Sever could not read the file");
             return;
         }
-        if (headFlag!= 0) {
+        if (headFlag == 0) {
             serve_static_head(fd, filename, sbuf.st_size);
-        } else if (getFlag != 0) {
+        } else if (getFlag == 0) {
             serve_static_get(fd, filename, sbuf.st_size);
         }
 
