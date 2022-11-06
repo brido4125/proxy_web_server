@@ -15,7 +15,8 @@ void serve_static_get(int fd, char *filename, int filesize);
 void serve_static_head(int fd, char *filename, int filesize);
 void get_filetype(char *filename, char *filetype);
 void serve_dynamic(int fd, char *filename, char *cgiargs);
-void clienterror(int fd, char *cause, char *errnum, char *shortmsg,char *longmsg);
+void clientErrorGet(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg);
+void clientErrorHead(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg);
 
 
 int main(int argc, char **argv) {
@@ -70,7 +71,7 @@ void doit(int fd){
     int getFlag = strcasecmp(method, "GET");
     int headFlag = strcasecmp(method, "HEAD");
     if (getFlag != 0 && headFlag != 0) {
-        clienterror(fd, method, "501", "Not Implemented", "this method is not implement");
+        clientErrorGet(fd, method, "501", "Not Implemented", "this method is not implement");
         return;
     }
     read_requesthdrs(&rio);
@@ -80,8 +81,11 @@ void doit(int fd){
      * */
     is_static = parse_uri(uri, filename, cgiargs);
     if (stat(filename, &sbuf) < 0) { // 들어온 파일이 로컬 디스크 상에 없을 경우 에러내고 리턴
-        printf("filename : %s\n",filename);
-        clienterror(fd, filename, "404", "NOT FOUND", "Server could not find this file");
+        if (headFlag == 0) {
+            clientErrorHead(fd, filename, "404", "NOT FOUND", "Server could not find this file");
+            return;
+        }
+        clientErrorGet(fd, filename, "404", "NOT FOUND", "Server could not find this file");
         return;
     }
     /*
@@ -89,7 +93,11 @@ void doit(int fd){
      * */
     if (is_static) {
         if (!(S_ISREG(sbuf.st_mode)) || !(S_IRUSR & sbuf.st_mode)) {//file에 대한 접근 권한이 없는 경우
-            clienterror(fd, filename, "403", "Forbidden", "Sever could not read the file");
+            if (headFlag == 0) {
+                clientErrorHead(fd, filename, "403", "Forbidden", "Sever could not read the file");
+                return;
+            }
+            clientErrorGet(fd, filename, "403", "Forbidden", "Sever could not read the file");
             return;
         }
         if (headFlag == 0) {
@@ -104,14 +112,18 @@ void doit(int fd){
      * */
     else{
         if (!(S_ISREG(sbuf.st_mode)) || !(S_IXUSR & sbuf.st_mode)) {
-            clienterror(fd, filename, "403", "Forbidden", "Sever could not run the file");
+            if (headFlag == 0) {
+                clientErrorHead(fd, filename, "403", "Forbidden", "Sever could not run the file");
+                return;
+            }
+            clientErrorGet(fd, filename, "403", "Forbidden", "Sever could not run the file");
             return;
         }
         serve_dynamic(fd, filename, cgiargs);
     }
 }
 
-void clienterror(int fd, char *cause, char *errnum, char *shortmsg,char *longmsg){
+void clientErrorGet(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg){
     char buf[MAXLINE], body[MAXBUF];
 
     /* Build the HTTP response body*/
@@ -129,6 +141,25 @@ void clienterror(int fd, char *cause, char *errnum, char *shortmsg,char *longmsg
     sprintf(buf,"Content-length: %d\r\n\r\n",(int) strlen(body));
     Rio_writen(fd, buf, strlen(buf));
     Rio_writen(fd, body, strlen(body));
+}
+
+void clientErrorHead(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg){
+    char buf[MAXLINE], body[MAXBUF];
+
+    /* Build the HTTP response body*/
+    sprintf(body,"<html><title>Tiny Error</title>");
+    sprintf(body,"%s<body bgcolor=""ffffff"">\r\n",body);
+    sprintf(body,"%s%s: %s\r\n",body,errnum,shortmsg);
+    sprintf(body,"%s<p>%s: %s\r\n",body,longmsg,cause);
+    sprintf(body,"%s<hr><em>The Tiny Web Server</em>\r\n",body);
+
+    /* Print the HTTP response*/
+    sprintf(buf,"HTTP/1.0 %s %s\r\n", errnum, shortmsg);
+    Rio_writen(fd, buf, strlen(buf));
+    sprintf(buf,"Content-type: text/html\r\n");
+    Rio_writen(fd, buf, strlen(buf));
+    sprintf(buf,"Content-length: %d\r\n\r\n",(int) strlen(body));
+    Rio_writen(fd, buf, strlen(buf));
 }
 
 void read_requesthdrs(rio_t *rp){
