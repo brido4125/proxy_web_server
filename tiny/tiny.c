@@ -64,6 +64,10 @@ void doit(int fd){
     Rio_readinitb(&rio, fd);
     printf("rio->rio.cnt : %d\n", rio.rio_cnt);
     printf("rio->buffer before set : %s\n", rio.rio_buf);
+    /* buffer 비우기 */
+    if (rio.rio_buf[0] != '\0') {
+        rio.rio_buf[0] = '\0';
+    }
     Rio_readlineb(&rio, buf, MAXLINE);
     printf("rio->buffer after set : %s\n", rio.rio_buf);
     printf("Rio_readlineb end\n");
