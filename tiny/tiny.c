@@ -68,7 +68,7 @@ void doit(int fd){
     printf("Request headers:\n");
     printf("%s", buf);
     sscanf(buf, "%s %s %s", method, uri, version);
-    if (strcasecmp(method, "GET") || strcasecmp(method, "HEAD")) {
+    if (strcasecmp(method, "GET")) {
         clienterror(fd, method, "501", "Not Implemented", "this method is not implement");
         return;
     }
