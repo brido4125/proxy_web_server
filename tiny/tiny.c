@@ -188,10 +188,13 @@ void serve_static(int fd, char *filename, int filesize){
 
     /* Send response body to client*/
     srcfd = Open(filename, O_RDONLY, 0);
-    srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0);
+    //srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0);
+    srcp = (char*)malloc(filesize);
+    Rio_readn(srcfd, srcp, filesize);
     Close(srcfd);
     Rio_writen(fd, srcp, filesize);
-    Munmap(srcp, filesize);// 매핑된 가상메모리 주소를 반환한다.
+    //Munmap(srcp, filesize);// 매핑된 가상메모리 주소를 반환한다.
+    free(srcp);
 }
 
 void get_filetype(char *filename, char *filetype){
