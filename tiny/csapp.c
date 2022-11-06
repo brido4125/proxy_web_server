@@ -807,10 +807,9 @@ static ssize_t rio_read(rio_t *rp, char *usrbuf, size_t n)
     printf("rio_read start\n");
 
     int cnt;
-
+    printf("rp->rio_cnt : %d\n", rp->rio_cnt);
     while (rp->rio_cnt <= 0) {  /* Refill if buf is empty */
         printf("rio_read while\n");
-        printf("rp->rio_cnt : %d\n", rp->rio_cnt);
         rp->rio_cnt = read(rp->rio_fd, rp->rio_buf,sizeof(rp->rio_buf));
 	if (rp->rio_cnt < 0) {
 	    if (errno != EINTR) /* Interrupted by sig handler return */
@@ -875,11 +874,9 @@ ssize_t rio_readnb(rio_t *rp, void *usrbuf, size_t n)
 /* $begin rio_readlineb */
 ssize_t rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen) 
 {
-    printf("rio_readlineb start\n");
     int n, rc;
     char c, *bufp = usrbuf;
     for (n = 1; n < maxlen; n++) {
-        printf("rio_readlineb maxlen : %ld\n", maxlen);
         if ((rc = rio_read(rp, &c, 1)) == 1) {
 	    *bufp++ = c;
 	    if (c == '\n') {
@@ -919,10 +916,8 @@ void Rio_writen(int fd, void *usrbuf, size_t n)
 
 void Rio_readinitb(rio_t *rp, int fd)
 {
-    printf("Rio_readinitb start\n");
     rio_readinitb(rp, fd);
-    printf("Rio_readinitb end\n");
-} 
+}
 
 ssize_t Rio_readnb(rio_t *rp, void *usrbuf, size_t n) 
 {
@@ -935,7 +930,6 @@ ssize_t Rio_readnb(rio_t *rp, void *usrbuf, size_t n)
 
 ssize_t Rio_readlineb(rio_t *rp, void *usrbuf, size_t maxlen) 
 {
-    printf("Rio_readlineb start\n");
     ssize_t rc;
 
     if ((rc = rio_readlineb(rp, usrbuf, maxlen)) < 0)
