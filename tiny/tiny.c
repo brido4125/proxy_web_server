@@ -63,8 +63,9 @@ void doit(int fd){
      * */
     Rio_readinitb(&rio, fd);
     printf("rio->rio.cnt : %d\n", rio.rio_cnt);
-    printf("rio->buffer : %s\n", rio.rio_buf);
+    printf("rio->buffer before set : %s\n", rio.rio_buf);
     Rio_readlineb(&rio, buf, MAXLINE);
+    printf("rio->buffer after set : %s\n", rio.rio_buf);
     printf("Rio_readlineb end\n");
     printf("Request headers:\n");
     printf("%s", buf);
