@@ -67,11 +67,8 @@ void doit(int fd){
     }
     Rio_readlineb(&rio, buf, MAXLINE);
     sscanf(buf, "%s %s %s", method, uri, version);
-    printf("method : %s\n", method);
     int getFlag = strcasecmp(method, "GET");
     int headFlag = strcasecmp(method, "HEAD");
-    printf("getFlag = %d\n", getFlag);
-    printf("headFlag = %d\n", headFlag);
     if (getFlag != 0 && headFlag != 0) {
         clienterror(fd, method, "501", "Not Implemented", "this method is not implement");
         return;
@@ -82,6 +79,7 @@ void doit(int fd){
      * Parse URI form GET 요청
      * */
     is_static = parse_uri(uri, filename, cgiargs);
+    printf("stat : %d\n",stat(filename, &sbuf));
     if (stat(filename, &sbuf) < 0) { // 들어온 파일이 로컬 디스크 상에 없을 경우 에러내고 리턴
         clienterror(fd, filename, "404", "NOT FOUND", "Server could not find this file");
         return;
@@ -96,7 +94,7 @@ void doit(int fd){
         }
         if (headFlag == 0) {
             serve_static_head(fd, filename, sbuf.st_size);
-        } else if (getFlag == 0) {
+        } else{
             serve_static_get(fd, filename, sbuf.st_size);
         }
 
@@ -198,7 +196,6 @@ void serve_static_head(int fd, char *filename, int filesize){
 void serve_static_get(int fd, char *filename, int filesize){
     int srcfd;
     char *srcp;
-
 
     serve_static_head(fd, filename, filesize);
 
