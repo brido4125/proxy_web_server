@@ -25,7 +25,7 @@ int main(void)
             content, n1, n2, n1 + n2);
     sprintf(content, "%sThanks for visiting! \r\n", content);
 
-    if (!strcasecmp(method, "HEAD")) {
+    if (strcasecmp(method, "HEAD") == 0) {
         sprintf(content, "%sConnection: close\r\n", content);
         sprintf(content, "%sContent-length: %lu\r\n", content, strlen(content));
         sprintf(content, "%sContent-type: text/html\r\n\r\n", content);
