@@ -34,6 +34,7 @@ int main(int argc,char **argv) {
         Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
         printf("Accepted connection from (%s, %s)\n", hostname, port);
         server_fd = Open_clientfd(hostname, 80);
+        printf("server_fd = %d \n", server_fd);
         parsing(connfd,server_fd);
         Close(connfd);  // line:netp:tiny:close
     }
