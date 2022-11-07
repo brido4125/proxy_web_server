@@ -54,6 +54,7 @@ void readAndWriteRequest(rio_t *rp,int server_fd){
     char buf[MAXLINE];
 
     Rio_readlineb(rp, buf, MAXLINE);
+    printf("%s\n", buf);
     while (strcmp(buf, "\r\n") != 0) {
         Rio_readlineb(rp, buf, MAXLINE);
         printf("%s", buf);
