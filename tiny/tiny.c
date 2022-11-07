@@ -14,7 +14,7 @@ int parse_uri(char *uri, char *filename, char *cgiargs);
 void serve_static_get(int fd, char *filename, int filesize);
 void serve_static_head(int fd, char *filename, int filesize);
 void get_filetype(char *filename, char *filetype);
-void serve_dynamic(int fd, char *filename, char *cgiargs);
+void serve_dynamic(int fd, char *filename, char *cgiargs,char * method);
 void clientErrorGet(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg);
 void clientErrorHead(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg);
 
@@ -119,7 +119,7 @@ void doit(int fd){
             clientErrorGet(fd, filename, "403", "Forbidden", "Sever could not run the file");
             return;
         }
-        serve_dynamic(fd, filename, cgiargs);
+        serve_dynamic(fd, filename, cgiargs,method);
     }
 }
 
@@ -216,6 +216,9 @@ void serve_static_head(int fd, char *filename, int filesize){
     sprintf(buf,"%sServer: Tiny Web Server\r\n",buf);
     sprintf(buf,"%sConnection: close\r\n",buf);
     sprintf(buf,"%sContent-length: %d\r\n",buf,filesize);
+    /*
+     * \r\n\r\n 하는 이유 : HTTP 헤더의 집합은 항상 빈 줄로 끝나야함
+     * */
     sprintf(buf,"%sContent-type: %s\r\n\r\n",buf,filetype);
     Rio_writen(fd, buf, strlen(buf));
     printf("Response headers:\n");
@@ -268,7 +271,8 @@ void get_filetype(char *filename, char *filetype){
     }
 }
 
-void serve_dynamic(int fd, char *filename, char *cgiargs){
+
+void serve_dynamic(int fd, char *filename, char *cgiargs,char * method){
     char buf[MAXLINE], *emptylist[] = {NULL};
 
     /* Return first part of HTTP response*/
@@ -280,6 +284,7 @@ void serve_dynamic(int fd, char *filename, char *cgiargs){
     /* Child에게 CGI 프로그램 시킴*/
     if (Fork() == 0) {
         setenv("QUERY_STRING", cgiargs, 1);
+        setenv("REQUEST_METHOD", method, 1);
         Dup2(fd, STDOUT_FILENO);
         Execve(filename, emptylist, environ);
     }
