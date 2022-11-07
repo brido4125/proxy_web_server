@@ -11,6 +11,7 @@ static const char *user_agent_hdr =
     "Firefox/10.0.3\r\n";
 
 void domainNameToIp(char* domain);
+void parsing(int connfd);
 
 int main(int argc,char **argv) {
     int listenfd, connfd;
@@ -32,11 +33,26 @@ int main(int argc,char **argv) {
         connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);
         Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
         printf("Accepted connection from (%s, %s)\n", hostname, port);
-        domainNameToIp(hostname);
+        parsing(connfd);
         Close(connfd);  // line:netp:tiny:close
     }
-    printf("%s", user_agent_hdr);
-    return 0;
+}
+
+void parsing(int fd){
+    int is_static;//현재 들어온 HTTP 요청이 정적인지 동적인지 판단
+    struct stat sbuf;//HTTP 요청으로 들어온 file에 대한 정보를 저장하는 구조체
+    char buf[MAXLINE],method[MAXLINE],uri[MAXLINE],version[MAXLINE];
+    char filename[MAXLINE], cgiargs[MAXLINE];
+    rio_t rio;
+    /*
+     * HTTP 요청을 읽음(HTTP 헤더 파싱)
+     * */
+    Rio_readinitb(&rio, fd);
+    Rio_readlineb(&rio, buf, MAXLINE);
+    sscanf(buf, "%s %s %s", method, uri, version);
+    printf("method : %s\n", method);
+    printf("uri : %s\n", uri);
+    printf("version : %s\n", version);
 }
 void domainNameToIp(char* domain){
     struct addrinfo *p, *listp, hints;
