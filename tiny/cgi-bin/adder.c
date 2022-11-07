@@ -16,6 +16,7 @@ int main(void)
         n1 = atoi(arg1);
         n2 = atoi(arg2);
     }
+    method = getenv("REQUEST_METHOD");
     /* Make the response body */
     sprintf(content, "QUERY_STRING=%s", buf);
     sprintf(content, "Welcome to add.com: ");
@@ -24,14 +25,13 @@ int main(void)
             content, n1, n2, n1 + n2);
     sprintf(content, "%sThanks for visiting! \r\n", content);
 
-    method = getenv("REQUEST_METHOD");
-
     if (!strcasecmp(method, "HEAD")) {
         sprintf(content, "%sConnection: close\r\n", content);
         sprintf(content, "%sContent-length: %lu\r\n", content, strlen(content));
         sprintf(content, "%sContent-type: text/html\r\n\r\n", content);
-        printf("Response headers:\n");
-        printf("%s", content);
+        printf("Connection : close\r\n");
+        printf("Content-length: %d\r\n", (int)strlen(content));
+        printf("Content-type : text/html \r\n\r\n");
 
         fflush(stdout);
 
