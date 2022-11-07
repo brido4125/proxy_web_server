@@ -44,8 +44,6 @@ int main(int argc, char **argv) {
        * */
       doit(connfd);
       Close(connfd);  // line:netp:tiny:close
-      printf("port : %s\n", port);
-      printf("Closed connection from (%s, %s)\n", hostname, port);
   }
 }
 
