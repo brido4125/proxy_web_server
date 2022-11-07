@@ -12,7 +12,7 @@ static const char *user_agent_hdr =
 
 void domainNameToIp(char* domain);
 void parsing(int fd,int server_fd);
-void readAndWriteRequest(rio_t *rp,rio_t* server_rp);
+void readAndWriteRequest(rio_t *rp,int server_fd);
 
 int main(int argc,char **argv) {
     int listenfd, connfd, server_fd;
@@ -47,17 +47,17 @@ void parsing(int fd,int server_fd){
     rio_t rio,server_rio;
     Rio_readinitb(&rio, fd);
     Rio_readinitb(&server_rio, server_fd);
-    readAndWriteRequest(&rio,&server_rio);
+    readAndWriteRequest(&rio,server_fd);
 }
 
-void readAndWriteRequest(rio_t *rp,rio_t* server_rp){
+void readAndWriteRequest(rio_t *rp,int server_fd){
     char buf[MAXLINE];
 
     Rio_readlineb(rp, buf, MAXLINE);
     while (strcmp(buf, "\r\n") != 0) {
         Rio_readlineb(rp, buf, MAXLINE);
         printf("%s", buf);
-        Rio_writen(server_rp, buf, strlen(buf));
+        Rio_writen(server_fd, buf, strlen(buf));
     }
     return;
 }
