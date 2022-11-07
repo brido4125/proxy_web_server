@@ -15,9 +15,7 @@ void serve_static_get(int fd, char *filename, int filesize);
 void serve_static_head(int fd, char *filename, int filesize);
 void get_filetype(char *filename, char *filetype);
 void serve_dynamic(int fd, char *filename, char *cgiargs,char * method);
-void clientErrorGet(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg);
-void clientErrorHead(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg);
-
+void clientError(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg, short headFlag);
 
 int main(int argc, char **argv) {
   int listenfd, connfd;
@@ -66,10 +64,10 @@ void doit(int fd){
     }
     Rio_readlineb(&rio, buf, MAXLINE);
     sscanf(buf, "%s %s %s", method, uri, version);
-    int getFlag = strcasecmp(method, "GET");
-    int headFlag = strcasecmp(method, "HEAD");
+    short getFlag = strcasecmp(method, "GET");
+    short headFlag = strcasecmp(method, "HEAD");
     if (getFlag != 0 && headFlag != 0) {
-        clientErrorGet(fd, method, "501", "Not Implemented", "this method is not implement");
+        clientError(fd, method, "501", "Not Implemented", "this method is not implement",headFlag);
         return;
     }
     read_requesthdrs(&rio);
@@ -80,10 +78,10 @@ void doit(int fd){
     is_static = parse_uri(uri, filename, cgiargs);
     if (stat(filename, &sbuf) < 0) { // 들어온 파일이 로컬 디스크 상에 없을 경우 에러내고 리턴
         if (headFlag == 0) {
-            clientErrorHead(fd, filename, "404", "NOT FOUND", "Server could not find this file");
+            clientError(fd, filename, "404", "NOT FOUND", "Server could not find this file",headFlag);
             return;
         }
-        clientErrorGet(fd, filename, "404", "NOT FOUND", "Server could not find this file");
+        clientError(fd, filename, "404", "NOT FOUND", "Server could not find this file",headFlag);
         return;
     }
     /*
@@ -92,10 +90,10 @@ void doit(int fd){
     if (is_static) {
         if (!(S_ISREG(sbuf.st_mode)) || !(S_IRUSR & sbuf.st_mode)) {//file에 대한 접근 권한이 없는 경우
             if (headFlag == 0) {
-                clientErrorHead(fd, filename, "403", "Forbidden", "Sever could not read the file");
+                clientError(fd, filename, "403", "Forbidden", "Sever could not read the file",headFlag);
                 return;
             }
-            clientErrorGet(fd, filename, "403", "Forbidden", "Sever could not read the file");
+            clientError(fd, filename, "403", "Forbidden", "Sever could not read the file",headFlag);
             return;
         }
         if (headFlag == 0) {
@@ -111,17 +109,17 @@ void doit(int fd){
     else{
         if (!(S_ISREG(sbuf.st_mode)) || !(S_IXUSR & sbuf.st_mode)) {
             if (headFlag == 0) {
-                clientErrorHead(fd, filename, "403", "Forbidden", "Sever could not run the file");
+                clientError(fd, filename, "403", "Forbidden", "Sever could not run the file",headFlag);
                 return;
             }
-            clientErrorGet(fd, filename, "403", "Forbidden", "Sever could not run the file");
+            clientError(fd, filename, "403", "Forbidden", "Sever could not run the file",headFlag);
             return;
         }
         serve_dynamic(fd, filename, cgiargs,method);
     }
 }
 
-void clientErrorGet(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg){
+void clientError(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg, short headFlag){
     char buf[MAXLINE], body[MAXBUF];
 
     /* Build the HTTP response body*/
@@ -138,26 +136,10 @@ void clientErrorGet(int fd, char *cause, char *errnum, char *shortmsg, char *lon
     Rio_writen(fd, buf, strlen(buf));
     sprintf(buf,"Content-length: %d\r\n\r\n",(int) strlen(body));
     Rio_writen(fd, buf, strlen(buf));
+    if (headFlag == 0) {
+        return;
+    }
     Rio_writen(fd, body, strlen(body));
-}
-
-void clientErrorHead(int fd, char *cause, char *errnum, char *shortmsg, char *longmsg){
-    char buf[MAXLINE], body[MAXBUF];
-
-    /* Build the HTTP response body*/
-    sprintf(body,"<html><title>Tiny Error</title>");
-    sprintf(body,"%s<body bgcolor=""ffffff"">\r\n",body);
-    sprintf(body,"%s%s: %s\r\n",body,errnum,shortmsg);
-    sprintf(body,"%s<p>%s: %s\r\n",body,longmsg,cause);
-    sprintf(body,"%s<hr><em>The Tiny Web Server</em>\r\n",body);
-
-    /* Print the HTTP response*/
-    sprintf(buf,"HTTP/1.0 %s %s\r\n", errnum, shortmsg);
-    Rio_writen(fd, buf, strlen(buf));
-    sprintf(buf,"Content-type: text/html\r\n");
-    Rio_writen(fd, buf, strlen(buf));
-    sprintf(buf,"Content-length: %d\r\n\r\n",(int) strlen(body));
-    Rio_writen(fd, buf, strlen(buf));
 }
 
 void read_requesthdrs(rio_t *rp){

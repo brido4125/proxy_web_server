@@ -11,10 +11,11 @@ static const char *user_agent_hdr =
     "Firefox/10.0.3\r\n";
 
 void domainNameToIp(char* domain);
-void parsing(int connfd);
+void parsing(int fd,int server_fd);
+void readAndWriteRequest(rio_t *rp,rio_t* server_rp);
 
 int main(int argc,char **argv) {
-    int listenfd, connfd;
+    int listenfd, connfd, server_fd;
     char hostname[MAXLINE], port[MAXLINE];
     socklen_t clientlen;
     struct sockaddr_storage clientaddr;
@@ -27,32 +28,38 @@ int main(int argc,char **argv) {
 
     listenfd = Open_listenfd(argv[1]);
 
-
     while (1) {
         clientlen = sizeof(clientaddr);
         connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);
         Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
         printf("Accepted connection from (%s, %s)\n", hostname, port);
-        parsing(connfd);
+        server_fd = Open_clientfd(hostname, 80);
+        parsing(connfd,server_fd);
         Close(connfd);  // line:netp:tiny:close
     }
 }
 
-void parsing(int fd){
+void parsing(int fd,int server_fd){
     int is_static;//현재 들어온 HTTP 요청이 정적인지 동적인지 판단
     struct stat sbuf;//HTTP 요청으로 들어온 file에 대한 정보를 저장하는 구조체
     char buf[MAXLINE],method[MAXLINE],uri[MAXLINE],version[MAXLINE];
     char filename[MAXLINE], cgiargs[MAXLINE];
-    rio_t rio;
-    /*
-     * HTTP 요청을 읽음(HTTP 헤더 파싱)
-     * */
+    rio_t rio,server_rio;
     Rio_readinitb(&rio, fd);
-    Rio_readlineb(&rio, buf, MAXLINE);
-    sscanf(buf, "%s %s %s", method, uri, version);
-    printf("method : %s\n", method);
-    printf("uri : %s\n", uri);
-    printf("version : %s\n", version);
+    Rio_readinitb(&server_rio, server_fd);
+    readAndWriteRequest(&rio,&server_rio);
+}
+
+void readAndWriteRequest(rio_t *rp,rio_t* server_rp){
+    char buf[MAXLINE];
+
+    Rio_readlineb(rp, buf, MAXLINE);
+    while (strcmp(buf, "\r\n") != 0) {
+        Rio_readlineb(rp, buf, MAXLINE);
+        printf("%s", buf);
+        Rio_writen(server_rp, buf, strlen(buf));
+    }
+    return;
 }
 void domainNameToIp(char* domain){
     struct addrinfo *p, *listp, hints;
