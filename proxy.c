@@ -10,13 +10,14 @@ static const char *user_agent_hdr =
     "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3\r\n";
 
 void domainNameToIp(char* domain);
-void parsing(int fd,int server_fd);
+void parsing(int fd);
 void readAndWriteRequest(rio_t *rp,int server_fd);
-void read_requesthdrs(rio_t *rp);
+void read_requesthdrs(rio_t *rp,char * userAgent);
+void make_request_to_sever(rio_t *rp);
+char* get_port_number(char* s, int start, int end);
 
 int main(int argc,char **argv) {
     int listenfd, connfd, server_fd;
-    char hostname[MAXLINE], port[MAXLINE];
     socklen_t clientlen;
     struct sockaddr_storage clientaddr;
 
@@ -33,30 +34,70 @@ int main(int argc,char **argv) {
         connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);
         Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
         printf("Accepted connection from (%s, %s)\n", hostname, port);
-        //server_fd = Open_clientfd(hostname, 80);//여기가 문제
-        //printf("server_fd = %d \n", server_fd);
-        parsing(connfd,server_fd);
+        parsing(connfd);
         Close(connfd);  // line:netp:tiny:close
     }
 }
 
-void parsing(int fd,int server_fd){
-    int is_static;//현재 들어온 HTTP 요청이 정적인지 동적인지 판단
+void parsing(int fd){
+    int server_fd;
     struct stat sbuf;//HTTP 요청으로 들어온 file에 대한 정보를 저장하는 구조체
-    char buf[MAXLINE],method[MAXLINE],uri[MAXLINE],version[MAXLINE];
+    char buf[MAXLINE],method[MAXLINE],uri[MAXLINE],version[MAXLINE],userAgent[MAXLINE];
     char filename[MAXLINE], cgiargs[MAXLINE];
+    char hostname[MAXLINE], port[MAXLINE];
     rio_t rio,server_rio;
+
     Rio_readinitb(&rio, fd);
     Rio_readlineb(&rio, buf, MAXLINE);
     sscanf(buf, "%s %s %s", method, uri, version);
+    if (strcasecmp(method, "GET") != 0) {
+        printf("%s does not implemented\n", method);
+        return;
+    }
+    char *portIndex = index(uri, ':');
+    if (portIndex == NULL) {
+        strcpy(port,"80");
+    }else{
+        strncpy(port, portIndex, 5);
+    }
     printf("======Request From Client=======\n");
     printf("%s", buf);
-    read_requesthdrs(&rio);
+    read_requesthdrs(&rio,userAgent);
+
+    //server_fd = Open_clientfd(hostname, port);
+
+
+    make_request_to_sever(&server_rio);
     //Rio_readinitb(&server_rio, server_fd);
     //readAndWriteRequest(&rio,server_fd);
 }
 
-void read_requesthdrs(rio_t *rp){
+
+/*void make_request_to_sever(rio_t *rp){
+    char filetype[MAXLINE], buf[MAXBUF];
+*//* Send Response 헤더 *//*
+    sprintf(buf,"HTTP/1.0 200 OK\r\n");//시작줄 설정
+    sprintf(buf,"%sServer: Tiny Web Server\r\n",buf);
+    sprintf(buf,"%sConnection: close\r\n",buf);
+    *//*
+     * \r\n\r\n 하는 이유 : HTTP 헤더의 집합은 항상 빈 줄로 끝나야함
+     * *//*
+    sprintf(buf,"%sContent-type: %s\r\n\r\n",buf,filetype);
+    //Rio_writen(fd, buf, strlen(buf));
+    printf("Response headers:\n");
+    printf("%s", buf);
+
+    Rio_writen(server_fd, buf, strlen(buf));
+    while(strcmp(buf, "\r\n"))
+    {
+        Rio_readlineb(&rp, buf, MAXLINE);
+        ssacnf(content, "%s%s", content, buf);
+        printf("%s", buf)
+
+    }
+}*/
+
+void read_requesthdrs(rio_t *rp,char * userAgent){
     char buf[MAXLINE];
 
     Rio_readlineb(rp, buf, MAXLINE);
