@@ -97,6 +97,7 @@ void doit(int fd)
     make_request_to_server(ptsfd,url, host, port, method, version, filename);
     printf("=======Receive Request To Server=======\n");
     Rio_readnb(&server_rio, response, MAX_OBJECT_SIZE);
+    printf("%s", response);
     Close(ptsfd);
 
 }
@@ -123,5 +124,5 @@ void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* m
     sprintf(buf, "%sConnection: close\r\n", buf);
     sprintf(buf, "%sProxy-Connection: close\r\n\r\n", buf);
     Rio_writen(ptsfd, buf, strlen(buf));
-
+    printf("%s", buf);
 }
