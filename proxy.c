@@ -91,11 +91,11 @@ void doit(int fd)
     int ptsfd = Open_clientfd(host, port);
     Rio_readinitb(&server_rio, ptsfd);
 
-    printf("=======Receive Request From Client=======");
+    printf("=======Receive Request From Client=======\n");
     read_requesthdrs(&client_rio);
-    printf("=======Send Request To Server=======");
+    printf("=======Send Request To Server=======\n");
     make_request_to_server(ptsfd,url, host, port, method, version, filename);
-    printf("=======Receive Request To Server=======");
+    printf("=======Receive Request To Server=======\n");
     Rio_readnb(&server_rio, response, MAX_OBJECT_SIZE);
     Close(ptsfd);
 
