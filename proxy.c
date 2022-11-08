@@ -120,7 +120,10 @@ void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* m
     char buf[MAXLINE];
 
     printf("filename : %s \n", filename);
-    strcpy(url, (const char *) '/');
+    strcpy(url, "/\n");
+    if (filename != NULL) {
+        strcat(url, filename);
+    }
     printf("url in method : %s \n", url);
     sprintf(buf, "%s %s %s\r\n", method, url, version);
     sprintf(buf, "%sHost: %s:%s\r\n", buf, host, port);
