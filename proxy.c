@@ -20,6 +20,7 @@ int main(int argc,char **argv) {
     int listenfd, connfd, server_fd;
     socklen_t clientlen;
     struct sockaddr_storage clientaddr;
+    char hostname[MAXLINE], port[MAXLINE];
 
     /* Check command line args */
     if (argc != 2) {
