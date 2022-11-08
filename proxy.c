@@ -49,6 +49,7 @@ void doit(int fd){
     char buf[MAXLINE],method[MAXLINE],uri[MAXLINE],version[MAXLINE],userAgent[MAXLINE];
     char filename[MAXLINE], cgiargs[MAXLINE];
     char hostname[MAXLINE], port[MAXLINE];
+    char response[MAX_OBJECT_SIZE];
     rio_t clientRio,serverRio;
 
     Rio_readinitb(&clientRio, fd);
@@ -74,18 +75,12 @@ void doit(int fd){
     read_requesthdrs(&clientRio);
     printf("======Request To Server=======\n");
     serverFd = Open_clientfd(ipAddress, port);
-    printf("serverFd : %d \n", serverFd);
     Rio_readinitb(&serverRio, serverFd);
+    printf("======Connected To Server=======\n");
     make_request_to_sever(uri,serverFd);
     printf("======Response From Server=======\n");
-    /*receive message from end server and send to the client*/
-    size_t n;
-    while((n=Rio_readlineb(&serverRio,buf,MAXLINE))!=0)
-    {
-        printf("proxy received %zu bytes,then send\n",n);
-        printf("%s", buf);
-        Rio_writen(fd,buf,n);
-    }
+    Rio_readnb(&serverRio, response, MAX_OBJECT_SIZE);
+    //read_response_from_server(&serverRio);
     Close(serverFd);
 }
 
