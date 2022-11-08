@@ -83,6 +83,7 @@ void doit(int fd){
     while((n=Rio_readlineb(&serverRio,buf,MAXLINE))!=0)
     {
         printf("proxy received %zu bytes,then send\n",n);
+        printf("%s", buf);
         Rio_writen(fd,buf,n);
     }
     Close(serverFd);
