@@ -13,6 +13,7 @@ static const char *user_agent_hdr =
 void domainNameToIp(char* domain);
 void parsing(int fd,int server_fd);
 void readAndWriteRequest(rio_t *rp,int server_fd);
+void read_requesthdrs(rio_t *rp);
 
 int main(int argc,char **argv) {
     int listenfd, connfd, server_fd;
@@ -33,8 +34,8 @@ int main(int argc,char **argv) {
         connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);
         Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
         printf("Accepted connection from (%s, %s)\n", hostname, port);
-        server_fd = Open_clientfd(hostname, 80);
-        printf("server_fd = %d \n", server_fd);
+        //server_fd = Open_clientfd(hostname, 80);//여기가 문제
+        //printf("server_fd = %d \n", server_fd);
         parsing(connfd,server_fd);
         Close(connfd);  // line:netp:tiny:close
     }
@@ -47,8 +48,24 @@ void parsing(int fd,int server_fd){
     char filename[MAXLINE], cgiargs[MAXLINE];
     rio_t rio,server_rio;
     Rio_readinitb(&rio, fd);
-    Rio_readinitb(&server_rio, server_fd);
-    readAndWriteRequest(&rio,server_fd);
+    Rio_readlineb(&rio, buf, MAXLINE);
+    sscanf(buf, "%s %s %s", method, uri, version);
+    printf("======Request From Client=======\n");
+    printf("%s", buf);
+    read_requesthdrs(&rio);
+    //Rio_readinitb(&server_rio, server_fd);
+    //readAndWriteRequest(&rio,server_fd);
+}
+
+void read_requesthdrs(rio_t *rp){
+    char buf[MAXLINE];
+
+    Rio_readlineb(rp, buf, MAXLINE);
+    while (strcmp(buf, "\r\n") != 0) {
+        Rio_readlineb(rp, buf, MAXLINE);
+        printf("%s", buf);
+    }
+    return;
 }
 
 void readAndWriteRequest(rio_t *rp,int server_fd){
