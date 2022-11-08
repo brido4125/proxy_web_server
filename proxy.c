@@ -9,14 +9,14 @@ static const char* proxy_port;
 
 /* You won't lose style points for including this long line in your code */
 static const char *user_agent_hdr =
-    "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3\r\n";
+    "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3";
 
 void domainNameToIp(char* domain);
 void doit(int fd);
 void readAndWriteRequest(rio_t *rp,int server_fd);
 void read_requesthdrs(rio_t *rp);
 void make_request_to_sever(char* host,int serverFd);
-char* get_port_number(char* s, int start, int end);
+void read_response_from_server(rio_t* rio);
 
 int main(int argc,char **argv) {
     int listenfd, connfd;//FD 값 선언
@@ -77,8 +77,20 @@ void doit(int fd){
     printf("serverFd : %d \n", serverFd);
     Rio_readinitb(&serverRio, serverFd);
     make_request_to_sever(uri,serverFd);
+    printf("======Response From Server=======\n");
+    read_response_from_server(&serverRio);
 }
 
+void read_response_from_server(rio_t* rio){
+    char buf[MAXBUF];
+
+    Rio_readlineb(rio, buf, MAXLINE);
+    printf("%s", buf);
+    while (strcmp(buf, "\r\n") != 0) {
+        Rio_readlineb(rio, buf, MAXLINE);
+        printf("%s", buf);
+    }
+}
 
 void make_request_to_sever(char* host,int serverFd){
     printf("make_request_to_sever - start \n");
@@ -97,11 +109,10 @@ void read_requesthdrs(rio_t *rp){
 
     Rio_readlineb(rp, buf, MAXLINE);
     printf("%s", buf);
-    while (strcmp(buf, "\r\n")) {
+    while (strcmp(buf, "\r\n") != 0) {
         Rio_readlineb(rp, buf, MAXLINE);
         printf("%s", buf);
     }
-    return;
-}
+    }
 
 
