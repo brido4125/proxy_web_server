@@ -11,7 +11,7 @@ static const char *proxy_port;
 
 void doit(int fd);
 void read_requesthdrs(rio_t *rp);
-int make_request_to_server(char* url, char* host, char* port, char* method, char* version, char* filename);
+void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* method, char* version, char* filename);
 
 int main(int argc, char **argv)
 {
@@ -50,7 +50,8 @@ void doit(int fd)
     // sbuf 에 메타데이터 정보가 저장됨 (필요함)
     //
     char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], url[MAXLINE], version[MAXLINE], port[MAXLINE], host[MAXLINE], filename[MAXLINE];
-    rio_t client_rio;
+    char response[MAX_OBJECT_SIZE];
+    rio_t client_rio,server_rio;
     char *p;
 
     Rio_readinitb(&client_rio, fd);
@@ -87,8 +88,13 @@ void doit(int fd)
         return;
     }
 
+    int ptsfd = Open_clientfd(host, port);
+    Rio_readinitb(&server_rio, ptsfd);
+
     read_requesthdrs(&client_rio);
-    make_request_to_server(url, host, port, method, version, filename);
+    make_request_to_server(ptsfd,url, host, port, method, version, filename);
+    Rio_readnb(&server_rio, response, MAX_OBJECT_SIZE);
+    Close(ptsfd);
 
 }
 
@@ -105,14 +111,8 @@ void read_requesthdrs(rio_t *rp)
     return;
 }
 
-int make_request_to_server(char* url, char* host, char* port, char* method, char* version, char* filename) {
-    int ptsfd; //proxy to server fd
-    char *p;
+void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* method, char* version, char* filename) {
     char buf[MAXLINE];
-    rio_t pts_rio;
-
-    ptsfd = Open_clientfd(host, port);
-    Rio_readinitb(&pts_rio, ptsfd);
 
     sprintf(buf, "%s %s %s\r\n", method, url, version);
     sprintf(buf, "%sHost: %s:%s\r\n", buf, host, port);
@@ -120,7 +120,5 @@ int make_request_to_server(char* url, char* host, char* port, char* method, char
     sprintf(buf, "%sConnection: close\r\n", buf);
     sprintf(buf, "%sProxy-Connection: close\r\n\r\n", buf);
     Rio_writen(ptsfd, buf, strlen(buf));
-    Close(ptsfd);
 
-    return host;
 }
