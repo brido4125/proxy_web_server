@@ -89,6 +89,7 @@ void make_request_to_sever(char* host,int serverFd){
     sprintf(buf,"%sConnection: close\r\n",buf);
     sprintf(buf,"%sProxy-Connection: close\r\n",buf);
     Rio_writen(serverFd, buf, strlen(buf));
+    printf("%s", buf);
 }
 
 void read_requesthdrs(rio_t *rp){
