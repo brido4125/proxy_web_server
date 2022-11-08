@@ -10,17 +10,17 @@ static const char *user_agent_hdr =
     "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3\r\n";
 
 void domainNameToIp(char* domain);
-void parsing(int fd);
+void doit(int fd);
 void readAndWriteRequest(rio_t *rp,int server_fd);
 void read_requesthdrs(rio_t *rp,char * userAgent);
 //void make_request_to_sever(rio_t *rp);
 char* get_port_number(char* s, int start, int end);
 
 int main(int argc,char **argv) {
-    int listenfd, connfd, server_fd;
+    int listenfd, connfd;//FD 값 선언
     socklen_t clientlen;
     struct sockaddr_storage clientaddr;
-    char hostname[MAXLINE], port[MAXLINE];
+    char origin_hostname[MAXLINE], origin_port[MAXLINE];
 
     /* Check command line args */
     if (argc != 2) {
@@ -28,19 +28,19 @@ int main(int argc,char **argv) {
         exit(1);
     }
 
-    listenfd = Open_listenfd(argv[1]);
+    listenfd = Open_listenfd(argv[1]);//getAddressInfo가 내부 호출됨
 
     while (1) {
         clientlen = sizeof(clientaddr);
         connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);
-        Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
-        printf("Accepted connection from (%s, %s)\n", hostname, port);
-        parsing(connfd);
-        Close(connfd);  // line:netp:tiny:close
+        Getnameinfo((SA *) &clientaddr, clientlen, origin_hostname, MAXLINE, origin_port, MAXLINE, 0);
+        printf("Accepted connection from (%s, %s)\n", origin_hostname, origin_port);
+        doit(connfd);
+        Close(connfd);
     }
 }
 
-void parsing(int fd){
+void doit(int fd){
     int server_fd;
     struct stat sbuf;//HTTP 요청으로 들어온 file에 대한 정보를 저장하는 구조체
     char buf[MAXLINE],method[MAXLINE],uri[MAXLINE],version[MAXLINE],userAgent[MAXLINE];
@@ -100,6 +100,7 @@ void parsing(int fd){
 }*/
 
 void read_requesthdrs(rio_t *rp,char * userAgent){
+    printf("here is read_requesthdrs\n");
     char buf[MAXLINE];
 
     Rio_readlineb(rp, buf, MAXLINE);
