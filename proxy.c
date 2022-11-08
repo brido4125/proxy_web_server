@@ -81,9 +81,7 @@ void doit(int fd)
         sscanf(p+1, "%s", filename);
     }
 
-
-
-    if(strcasecmp(method, "GET")) {
+    if(strcasecmp(method, "GET") != 0) {
         sprintf(buf, "GET요청이 아닙니다.\r\n");
         Rio_writen(fd, buf, strlen(buf));
         return;
@@ -98,9 +96,10 @@ void doit(int fd)
     make_request_to_server(ptsfd,url, host, port, method, version, filename);
     printf("=======Receive Request To Server=======\n");
     Rio_readnb(&server_rio, response, MAX_OBJECT_SIZE);
+    printf("=======Send Response To Client=======\n");
+    Rio_writen(fd, response, MAX_OBJECT_SIZE);
     printf("%s", response);
     Close(ptsfd);
-
 }
 
 void read_requesthdrs(rio_t *rp)
@@ -124,7 +123,6 @@ void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* m
     if (filename != NULL) {
         strcat(url, filename);
     }
-    printf("url in method : %s \n", url);
     sprintf(buf, "%s %s %s\r\n", method, url, version);
     sprintf(buf, "%sHost: %s:%s\r\n", buf, host, port);
     sprintf(buf, "%s%s", buf, user_agent_hdr);
