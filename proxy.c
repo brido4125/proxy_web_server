@@ -50,14 +50,21 @@ void doit(int fd){
 
     Rio_readinitb(&clientRio, fd);
     Rio_readlineb(&clientRio, buf, MAXLINE);
-    sscanf(buf, "%s %s:%s %s", method, uri, port, version);
+    sscanf(buf, "%s http://%s %s", method, uri, version);
     if (strcasecmp(method, "GET") != 0) {
         printf("%s does not implemented\n", method);
         return;
     }
     printf("%s\n", uri);
+    char *portIndex = index(uri, ':');
+    if (portIndex == NULL) {
+        strcpy(port,"80");
+    }else{
+        strncpy(port, portIndex + 1, 5);
+    }
+    char *token = strtok(uri, ":");
+    printf("token = %s", token);
     printf("port : %s \n", port);
-    printf("%s\n", uri);
     printf("======Request From Client=======\n");
     printf("%s", buf);
     read_requesthdrs(&clientRio, userAgent);
@@ -96,6 +103,7 @@ void doit(int fd){
 }*/
 
 void read_requesthdrs(rio_t *rp,char * userAgent){
+    printf("here is read_requesthdrs\n");
     char buf[MAXLINE];
 
     Rio_readlineb(rp, buf, MAXLINE);
