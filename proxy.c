@@ -78,7 +78,7 @@ void doit(int fd){
     Rio_readinitb(&serverRio, serverFd);
     make_request_to_sever(uri,serverFd);
     printf("======Response From Server=======\n");
-    read_response_from_server(&serverRio);
+    //read_response_from_server(&serverRio);
     Close(serverFd);
 }
 
