@@ -60,6 +60,7 @@ void parsing(int fd){
     }else{
         strncpy(port, portIndex, 5);
     }
+    printf("port : %s \n", port);
     printf("======Request From Client=======\n");
     printf("%s", buf);
     read_requesthdrs(&rio,userAgent);
