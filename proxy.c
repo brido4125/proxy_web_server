@@ -7,11 +7,12 @@
 static const char *user_agent_hdr =
         "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 "
         "Firefox/10.0.3\r\n";
-static const char *proxy_port;
+//static const char *proxy_port;
 
 void doit(int fd);
 void read_requesthdrs(rio_t *rp);
 void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* method, char* version, char* filename);
+void parsingHeader(char* uri,char* host,char* port,char* filename);
 
 int main(int argc, char **argv)
 {
@@ -25,7 +26,7 @@ int main(int argc, char **argv)
         exit(1);
     }
     listenfd = Open_listenfd(argv[1]);
-    proxy_port = argv[1];
+    //proxy_port = argv[1];
 
     while (1)
     {
@@ -52,7 +53,6 @@ void doit(int fd)
     char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], url[MAXLINE], version[MAXLINE], port[MAXLINE], host[MAXLINE], filename[MAXLINE];
     char response[MAX_OBJECT_SIZE];
     rio_t client_rio,server_rio;
-    char *p;
 
     Rio_readinitb(&client_rio, fd);
     Rio_readlineb(&client_rio, buf, MAXLINE);
@@ -61,25 +61,7 @@ void doit(int fd)
     sscanf(buf, "%s %s %s", method, uri, version);
 
     strcpy(url, uri);
-    if ((p = strchr(uri,'/'))) {
-        *p = '\0';
-        sscanf(p+2, "%s", host);
-    }
-    else {
-        strcpy(host, uri);
-    }
-
-    if ((p = strchr(host,':'))) {
-        *p = '\0';
-        sscanf(host, "%s", host);
-        sscanf(p+1, "%s", port);
-    }
-
-    if ((p = strchr(port, '/'))) {
-        *p = '\0';
-        sscanf(port, "%s", port);
-        sscanf(p+1, "%s", filename);
-    }
+    parsingHeader(uri, host, port, filename);
 
     if(strcasecmp(method, "GET") != 0) {
         sprintf(buf, "GET요청이 아닙니다.\r\n");
@@ -101,6 +83,30 @@ void doit(int fd)
     Rio_writen(fd, response, MAX_OBJECT_SIZE);
     printf("%s", response);
     Close(ptsfd);
+}
+
+void parsingHeader(char* uri,char* host,char* port,char* filename){
+    char *p;
+
+    if ((p = strchr(uri,'/'))) {
+        *p = '\0';
+        sscanf(p+2, "%s", host);
+    }
+    else {
+        strcpy(host, uri);
+    }
+
+    if ((p = strchr(host,':'))) {
+        *p = '\0';
+        sscanf(host, "%s", host);
+        sscanf(p+1, "%s", port);
+    }
+
+    if ((p = strchr(port, '/'))) {
+        *p = '\0';
+        sscanf(port, "%s", port);
+        sscanf(p+1, "%s", filename);
+    }
 }
 
 void read_requesthdrs(rio_t *rp)
@@ -125,7 +131,7 @@ void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* m
         strcpy(url, "/");
         strcat(url, filename);
     }
-    printf("url : %s \n", url);
+    //printf("url : %s \n", url);
     sprintf(buf, "%s %s %s\r\n", method, url, version);
     sprintf(buf, "%sHost: %s:%s\r\n", buf, host, port);
     sprintf(buf, "%s%s", buf, user_agent_hdr);
