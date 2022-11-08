@@ -50,19 +50,12 @@ void doit(int fd){
 
     Rio_readinitb(&clientRio, fd);
     Rio_readlineb(&clientRio, buf, MAXLINE);
-    sscanf(buf, "%s http://%s %s", method, uri, version);
+    sscanf(buf, "%s http://%s:%s %s", method, uri,port, version);
     if (strcasecmp(method, "GET") != 0) {
         printf("%s does not implemented\n", method);
         return;
     }
     printf("%s\n", uri);
-    char *string = strtok(uri, ":");
-    strcpy(uri,string);
-    while (string != NULL) {
-        string = strtok(uri, ":");
-        strcpy(port,string);
-    }
-    printf("After Tokenizing\n");
     printf("port : %s \n", port);
     printf("%s\n", uri);
     printf("======Request From Client=======\n");
