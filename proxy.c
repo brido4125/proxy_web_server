@@ -12,7 +12,7 @@ static const char *user_agent_hdr =
 void domainNameToIp(char* domain);
 void doit(int fd);
 void readAndWriteRequest(rio_t *rp,int server_fd);
-void read_requesthdrs(rio_t *rp,char * userAgent);
+void read_requesthdrs(rio_t *rp);
 //void make_request_to_sever(rio_t *rp);
 char* get_port_number(char* s, int start, int end);
 
@@ -69,7 +69,7 @@ void doit(int fd){
     printf("%s\n", uri);
     printf("======Request From Client=======\n");
     printf("%s", buf);
-    read_requesthdrs(&clientRio, userAgent);
+    read_requesthdrs(&clientRio);
     printf("======Request To Server=======\n");
 
 
@@ -106,8 +106,7 @@ void doit(int fd){
     }
 }*/
 
-void read_requesthdrs(rio_t *rp,char * userAgent){
-    printf("here is read_requesthdrs\n");
+void read_requesthdrs(rio_t *rp){
     char buf[MAXLINE];
 
     Rio_readlineb(rp, buf, MAXLINE);
