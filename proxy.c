@@ -79,6 +79,7 @@ void doit(int fd){
     make_request_to_sever(uri,serverFd);
     printf("======Response From Server=======\n");
     read_response_from_server(&serverRio);
+    Close(serverFd);
 }
 
 void read_response_from_server(rio_t* rio){
