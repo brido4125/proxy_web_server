@@ -13,7 +13,7 @@ void domainNameToIp(char* domain);
 void parsing(int fd);
 void readAndWriteRequest(rio_t *rp,int server_fd);
 void read_requesthdrs(rio_t *rp,char * userAgent);
-void make_request_to_sever(rio_t *rp);
+//void make_request_to_sever(rio_t *rp);
 char* get_port_number(char* s, int start, int end);
 
 int main(int argc,char **argv) {
@@ -69,7 +69,7 @@ void parsing(int fd){
     //server_fd = Open_clientfd(hostname, port);
 
 
-    make_request_to_sever(&server_rio);
+    //make_request_to_sever(&server_rio);
     //Rio_readinitb(&server_rio, server_fd);
     //readAndWriteRequest(&rio,server_fd);
 }
