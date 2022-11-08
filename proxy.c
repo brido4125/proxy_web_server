@@ -96,6 +96,7 @@ void doit(int fd)
     make_request_to_server(ptsfd,url, host, port, method, version, filename);
     printf("=======Receive Request To Server=======\n");
     Rio_readnb(&server_rio, response, MAX_OBJECT_SIZE);
+    printf("%s", response);
     printf("=======Send Response To Client=======\n");
     Rio_writen(fd, response, MAX_OBJECT_SIZE);
     printf("%s", response);
