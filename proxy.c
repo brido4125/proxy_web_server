@@ -53,6 +53,7 @@ void doit(int fd)
     char response[MAX_OBJECT_SIZE];
     rio_t client_rio,server_rio;
     char *p;
+    strcpy(port,"80");
 
     Rio_readinitb(&client_rio, fd);
     Rio_readlineb(&client_rio, buf, MAXLINE);
