@@ -91,8 +91,11 @@ void doit(int fd)
     int ptsfd = Open_clientfd(host, port);
     Rio_readinitb(&server_rio, ptsfd);
 
+    printf("=======Receive Request From Client=======");
     read_requesthdrs(&client_rio);
+    printf("=======Send Request To Server=======");
     make_request_to_server(ptsfd,url, host, port, method, version, filename);
+    printf("=======Receive Request To Server=======");
     Rio_readnb(&server_rio, response, MAX_OBJECT_SIZE);
     Close(ptsfd);
 
@@ -103,10 +106,10 @@ void read_requesthdrs(rio_t *rp)
     char buf[MAXLINE];
 
     Rio_readlineb(rp, buf, MAXLINE); // 텍스트 줄을 rp에서 읽고 buf에 복사한 후 널 문자로 종료시킨다. 최대 MAXLINE - 1개의 바이트를 읽는다.
-    printf("rio_readlineb = %s", buf);
+    printf("%s", buf);
     while(strcmp(buf, "\r\n")) { // 첫번째 매개변수(buf)와 두번째 매개변수('\r\n')가 같을 경우 0을 반환
         Rio_readlineb(rp, buf, MAXLINE);
-        printf("rio_readlineb = %s", buf);
+        printf("%s", buf);
     }
     return;
 }
