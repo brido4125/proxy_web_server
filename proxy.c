@@ -56,13 +56,15 @@ void doit(int fd){
         return;
     }
     printf("%s\n", uri);
-    /*char *portIndex = index(uri, ':');
-    if (portIndex == NULL) {
-        strcpy(port,"80");
-    }else{
-        strncpy(port, portIndex + 1, 5);
-    }*/
+    char *string = strtok(uri, ":");
+    strcpy(uri,string);
+    while (string != NULL) {
+        string = strtok(uri, ":");
+        strcpy(port,string);
+    }
+    printf("After Tokenizing\n");
     printf("port : %s \n", port);
+    printf("%s\n", uri);
     printf("======Request From Client=======\n");
     printf("%s", buf);
     read_requesthdrs(&clientRio, userAgent);
