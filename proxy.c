@@ -53,7 +53,6 @@ void doit(int fd)
     char response[MAX_OBJECT_SIZE];
     rio_t client_rio,server_rio;
     char *p;
-    strcpy(port,"80");
 
     Rio_readinitb(&client_rio, fd);
     Rio_readlineb(&client_rio, buf, MAXLINE);
@@ -120,11 +119,9 @@ void read_requesthdrs(rio_t *rp)
 void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* method, char* version, char* filename) {
     char buf[MAXLINE];
 
-    printf("filename : %s \n", filename);
     strcpy(url, "/\n");
-    if (filename != NULL) {
-        strcat(url, filename);
-    }
+    strcat(url, filename);
+    printf("url : %s \n", url);
     sprintf(buf, "%s %s %s\r\n", method, url, version);
     sprintf(buf, "%sHost: %s:%s\r\n", buf, host, port);
     sprintf(buf, "%s%s", buf, user_agent_hdr);
