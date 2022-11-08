@@ -111,9 +111,10 @@ void read_requesthdrs(rio_t *rp,char * userAgent){
     char buf[MAXLINE];
 
     Rio_readlineb(rp, buf, MAXLINE);
+    printf("%s", buf);
     while (strcmp(buf, "\r\n") != 0) {
-        printf("%s", buf);
         Rio_readlineb(rp, buf, MAXLINE);
+        printf("%s", buf);
     }
     return;
 }
