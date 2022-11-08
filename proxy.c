@@ -119,8 +119,12 @@ void read_requesthdrs(rio_t *rp)
 void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* method, char* version, char* filename) {
     char buf[MAXLINE];
 
-    strcpy(url, "/\n");
-    strcat(url, filename);
+    if (strlen(filename) == 0) {
+        strcpy(url, "/\n");
+    }else{
+        strcpy(url, "/");
+        strcat(url, filename);
+    }
     printf("url : %s \n", url);
     sprintf(buf, "%s %s %s\r\n", method, url, version);
     sprintf(buf, "%sHost: %s:%s\r\n", buf, host, port);
