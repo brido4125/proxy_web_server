@@ -59,7 +59,7 @@ void parsing(int fd){
     if (portIndex == NULL) {
         strcpy(port,"80");
     }else{
-        strncpy(port, portIndex, 5);
+        strncpy(port, portIndex + 1, 5);
     }
     printf("port : %s \n", port);
     printf("======Request From Client=======\n");
