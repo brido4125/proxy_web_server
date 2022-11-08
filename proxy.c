@@ -62,7 +62,7 @@ void doit(int fd){
     }else{
         strncpy(port, portIndex + 1, 5);
     }
-    char *token = strtok(uri, ":");
+    char *token = strtok(uri, ":");//포트번호 없이 uri만 가지는 문자열
     printf("token = %s", token);
     strcpy(uri,token);
     printf("port : %s \n", port);
@@ -70,6 +70,8 @@ void doit(int fd){
     printf("======Request From Client=======\n");
     printf("%s", buf);
     read_requesthdrs(&clientRio, userAgent);
+    printf("======Request To Server=======\n");
+
 
     //server_fd = Open_clientfd(hostname, port);
 
