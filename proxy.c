@@ -73,14 +73,15 @@ void doit(int fd){
     printf("%s", buf);
     read_requesthdrs(&clientRio);
     printf("======Request To Server=======\n");
-
     serverFd = Open_clientfd(ipAddress, port);
+    printf("serverFd : %d \n", serverFd);
     Rio_readinitb(&serverRio, serverFd);
     make_request_to_sever(&serverRio,uri,serverFd);
 }
 
 
 void make_request_to_sever(rio_t *rp,char* host,int serverFd){
+    printf("make_request_to_sever - start \n");
     char buf[MAXBUF];
     sprintf(buf,"GET / HTTP/1.0\r\n");//시작줄 설정
     sprintf(buf,"%sHost: %s\r\n",buf,host);
