@@ -15,7 +15,7 @@ void domainNameToIp(char* domain);
 void doit(int fd);
 void readAndWriteRequest(rio_t *rp,int server_fd);
 void read_requesthdrs(rio_t *rp);
-void make_request_to_sever(rio_t *rp,char* host,int serverFd);
+void make_request_to_sever(char* host,int serverFd);
 char* get_port_number(char* s, int start, int end);
 
 int main(int argc,char **argv) {
@@ -76,21 +76,19 @@ void doit(int fd){
     serverFd = Open_clientfd(ipAddress, port);
     printf("serverFd : %d \n", serverFd);
     Rio_readinitb(&serverRio, serverFd);
-    make_request_to_sever(&serverRio,uri,serverFd);
+    make_request_to_sever(uri,serverFd);
 }
 
 
-void make_request_to_sever(rio_t *rp,char* host,int serverFd){
+void make_request_to_sever(char* host,int serverFd){
     printf("make_request_to_sever - start \n");
     char buf[MAXBUF];
     sprintf(buf,"GET / HTTP/1.0\r\n");//시작줄 설정
     sprintf(buf,"%sHost: %s\r\n",buf,host);
+    sprintf(buf,"%sUser-Agent:%s\r\n",buf,user_agent_hdr);
     sprintf(buf,"%sConnection: close\r\n",buf);
     sprintf(buf,"%sProxy-Connection: close\r\n",buf);
     Rio_writen(serverFd, buf, strlen(buf));
-    printf("Response headers:\n");
-    printf("%s", buf);
-
 }
 
 void read_requesthdrs(rio_t *rp){
