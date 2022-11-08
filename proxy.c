@@ -81,10 +81,6 @@ void doit(int fd)
         sscanf(p+1, "%s", filename);
     }
 
-    printf("uri : %s\n", uri);
-    printf("url : %s\n", url);
-    printf("port : %s\n", port);
-    printf("host : %s\n", host);
 
 
     if(strcasecmp(method, "GET")) {
@@ -123,6 +119,8 @@ void read_requesthdrs(rio_t *rp)
 void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* method, char* version, char* filename) {
     char buf[MAXLINE];
 
+    printf("filename : %s \n", filename);
+    strcpy(url, (const char *) '/');
     printf("url in method : %s \n", url);
     sprintf(buf, "%s %s %s\r\n", method, url, version);
     sprintf(buf, "%sHost: %s:%s\r\n", buf, host, port);
