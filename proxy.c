@@ -78,7 +78,13 @@ void doit(int fd){
     Rio_readinitb(&serverRio, serverFd);
     make_request_to_sever(uri,serverFd);
     printf("======Response From Server=======\n");
-    read_response_from_server(&serverRio);
+    /*receive message from end server and send to the client*/
+    size_t n;
+    while((n=Rio_readlineb(&serverRio,buf,MAXLINE))!=0)
+    {
+        printf("proxy received %zu bytes,then send\n",n);
+        Rio_writen(fd,buf,n);
+    }
     Close(serverFd);
 }
 
