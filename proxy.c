@@ -64,7 +64,9 @@ void doit(int fd){
     }
     char *token = strtok(uri, ":");
     printf("token = %s", token);
+    strcpy(uri,token);
     printf("port : %s \n", port);
+    printf("%s\n", uri);
     printf("======Request From Client=======\n");
     printf("%s", buf);
     read_requesthdrs(&clientRio, userAgent);
