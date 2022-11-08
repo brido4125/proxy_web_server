@@ -4,6 +4,8 @@
 /* Recommended max cache and object sizes */
 #define MAX_CACHE_SIZE 1049000
 #define MAX_OBJECT_SIZE 102400
+static const char* proxy_host;
+static const char* proxy_port;
 
 /* You won't lose style points for including this long line in your code */
 static const char *user_agent_hdr =
@@ -13,7 +15,7 @@ void domainNameToIp(char* domain);
 void doit(int fd);
 void readAndWriteRequest(rio_t *rp,int server_fd);
 void read_requesthdrs(rio_t *rp);
-//void make_request_to_sever(rio_t *rp);
+void make_request_to_sever(rio_t *rp,char* host,int serverFd);
 char* get_port_number(char* s, int start, int end);
 
 int main(int argc,char **argv) {
@@ -27,6 +29,7 @@ int main(int argc,char **argv) {
         fprintf(stderr, "usage: %s <port>\n", argv[0]);
         exit(1);
     }
+    proxy_port = argv[0];
 
     listenfd = Open_listenfd(argv[1]);//getAddressInfo가 내부 호출됨
 
@@ -62,9 +65,8 @@ void doit(int fd){
     }else{
         strncpy(port, portIndex + 1, 5);
     }
-    char *token = strtok(uri, ":");//포트번호 없이 uri만 가지는 문자열
-    printf("token = %s", token);
-    strcpy(uri,token);
+    char *ipAddress = strtok(uri, ":");//포트번호 없이 uri만 가지는 문자열
+
     printf("port : %s \n", port);
     printf("%s\n", uri);
     printf("======Request From Client=======\n");
@@ -72,39 +74,23 @@ void doit(int fd){
     read_requesthdrs(&clientRio);
     printf("======Request To Server=======\n");
 
-
-    //server_fd = Open_clientfd(hostname, port);
-
-
-    //make_request_to_sever(&serverRio);
-    //Rio_readinitb(&serverRio, server_fd);
-    //readAndWriteRequest(&clientRio,server_fd);
+    serverFd = Open_clientfd(ipAddress, port);
+    Rio_readinitb(&serverRio, serverFd);
+    make_request_to_sever(&serverRio,uri,serverFd);
 }
 
 
-/*void make_request_to_sever(rio_t *rp){
-    char filetype[MAXLINE], buf[MAXBUF];
-*//* Send Response 헤더 *//*
-    sprintf(buf,"HTTP/1.0 200 OK\r\n");//시작줄 설정
-    sprintf(buf,"%sServer: Tiny Web Server\r\n",buf);
+void make_request_to_sever(rio_t *rp,char* host,int serverFd){
+    char buf[MAXBUF];
+    sprintf(buf,"GET / HTTP/1.0\r\n");//시작줄 설정
+    sprintf(buf,"%sHost: %s\r\n",buf,host);
     sprintf(buf,"%sConnection: close\r\n",buf);
-    *//*
-     * \r\n\r\n 하는 이유 : HTTP 헤더의 집합은 항상 빈 줄로 끝나야함
-     * *//*
-    sprintf(buf,"%sContent-type: %s\r\n\r\n",buf,filetype);
-    //Rio_writen(fd, buf, strlen(buf));
+    sprintf(buf,"%sProxy-Connection: close\r\n",buf);
+    Rio_writen(serverFd, buf, strlen(buf));
     printf("Response headers:\n");
     printf("%s", buf);
 
-    Rio_writen(server_fd, buf, strlen(buf));
-    while(strcmp(buf, "\r\n"))
-    {
-        Rio_readlineb(&rp, buf, MAXLINE);
-        ssacnf(content, "%s%s", content, buf);
-        printf("%s", buf)
-
-    }
-}*/
+}
 
 void read_requesthdrs(rio_t *rp){
     char buf[MAXLINE];
@@ -118,37 +104,4 @@ void read_requesthdrs(rio_t *rp){
     return;
 }
 
-void readAndWriteRequest(rio_t *rp,int server_fd){
-    char buf[MAXLINE];
-
-    Rio_readlineb(rp, buf, MAXLINE);
-    printf("%s\n", buf);
-    while (strcmp(buf, "\r\n") != 0) {
-        Rio_readlineb(rp, buf, MAXLINE);
-        printf("%s", buf);
-        Rio_writen(server_fd, buf, strlen(buf));
-    }
-    return;
-}
-void domainNameToIp(char* domain){
-    struct addrinfo *p, *listp, hints;
-    char buf[MAXLINE];
-    int rc,flags;
-
-    memset(&hints,0,sizeof(struct addrinfo));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    if ((rc = getaddrinfo(domain, NULL, &hints, &listp)) != 0) {
-        fprintf(stderr, "getaddrinfo error %s\n", gai_strerror(rc));
-        exit(1);
-    }
-
-    flags = NI_NUMERICHOST;
-    for (p = listp; p; p = p->ai_next) {
-        Getnameinfo(p->ai_addr, p->ai_addrlen, buf, MAXLINE, NULL, 0, flags);
-        printf("%s\n", buf);
-    }
-    Freeaddrinfo(listp);
-    exit(0);
-}
 
