@@ -41,37 +41,38 @@ int main(int argc,char **argv) {
 }
 
 void doit(int fd){
-    int server_fd;
+    int serverFd;
     struct stat sbuf;//HTTP 요청으로 들어온 file에 대한 정보를 저장하는 구조체
     char buf[MAXLINE],method[MAXLINE],uri[MAXLINE],version[MAXLINE],userAgent[MAXLINE];
     char filename[MAXLINE], cgiargs[MAXLINE];
     char hostname[MAXLINE], port[MAXLINE];
-    rio_t rio,server_rio;
+    rio_t clientRio,serverRio;
 
-    Rio_readinitb(&rio, fd);
-    Rio_readlineb(&rio, buf, MAXLINE);
-    sscanf(buf, "%s %s %s", method, uri, version);
+    Rio_readinitb(&clientRio, fd);
+    Rio_readlineb(&clientRio, buf, MAXLINE);
+    sscanf(buf, "%s http://%s %s", method, uri, version);
     if (strcasecmp(method, "GET") != 0) {
         printf("%s does not implemented\n", method);
         return;
     }
-    char *portIndex = index(uri, ':');
+    printf("%s\n", uri);
+    /*char *portIndex = index(uri, ':');
     if (portIndex == NULL) {
         strcpy(port,"80");
     }else{
         strncpy(port, portIndex + 1, 5);
-    }
+    }*/
     printf("port : %s \n", port);
     printf("======Request From Client=======\n");
     printf("%s", buf);
-    read_requesthdrs(&rio,userAgent);
+    read_requesthdrs(&clientRio, userAgent);
 
     //server_fd = Open_clientfd(hostname, port);
 
 
-    //make_request_to_sever(&server_rio);
-    //Rio_readinitb(&server_rio, server_fd);
-    //readAndWriteRequest(&rio,server_fd);
+    //make_request_to_sever(&serverRio);
+    //Rio_readinitb(&serverRio, server_fd);
+    //readAndWriteRequest(&clientRio,server_fd);
 }
 
 
