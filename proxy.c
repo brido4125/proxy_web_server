@@ -76,21 +76,19 @@ void doit(int fd){
     printf("======Request To Server=======\n");
     serverFd = Open_clientfd(ipAddress, port);
     Rio_readinitb(&serverRio, serverFd);
-    printf("======Connected To Server=======\n");
     make_request_to_sever(uri,serverFd);
     printf("======Response From Server=======\n");
-    Rio_readnb(&serverRio, response, MAX_OBJECT_SIZE);
-    //read_response_from_server(&serverRio);
+    read_response_from_server(&serverRio);
     Close(serverFd);
 }
 
 void read_response_from_server(rio_t* rio){
-    char buf[MAXBUF];
+    char buf[MAX_OBJECT_SIZE];
 
-    Rio_readlineb(rio, buf, MAXLINE);
+    Rio_readlineb(rio, buf, MAX_OBJECT_SIZE);
     printf("%s", buf);
     while (strcmp(buf, "\r\n") != 0) {
-        Rio_readlineb(rio, buf, MAXLINE);
+        Rio_readlineb(rio, buf, MAX_OBJECT_SIZE);
         printf("%s", buf);
     }
 }
@@ -119,3 +117,11 @@ void read_requesthdrs(rio_t *rp){
     }
 
 
+/*
+GET localhost:8000/godzilla.jpg HTTP/1.0
+Host:52.78.57.212:5000
+User-Agent: "Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3"
+Connection: keep
+Proxy-Connection: keep
+abc: 123
+*/
