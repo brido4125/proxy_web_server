@@ -7,8 +7,7 @@
 
 /* You won't lose style points for including this long line in your code */
 static const char *user_agent_hdr =
-    "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 "
-    "Firefox/10.0.3\r\n";
+    "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3\r\n";
 
 void domainNameToIp(char* domain);
 void parsing(int fd,int server_fd);
@@ -62,8 +61,8 @@ void read_requesthdrs(rio_t *rp){
 
     Rio_readlineb(rp, buf, MAXLINE);
     while (strcmp(buf, "\r\n") != 0) {
-        Rio_readlineb(rp, buf, MAXLINE);
         printf("%s", buf);
+        Rio_readlineb(rp, buf, MAXLINE);
     }
     return;
 }
