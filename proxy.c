@@ -50,7 +50,7 @@ void doit(int fd){
 
     Rio_readinitb(&clientRio, fd);
     Rio_readlineb(&clientRio, buf, MAXLINE);
-    sscanf(buf, "%s http://%s:%s %s", method, uri,port, version);
+    sscanf(buf, "%s %s:%s %s", method, uri, port, version);
     if (strcasecmp(method, "GET") != 0) {
         printf("%s does not implemented\n", method);
         return;
@@ -96,7 +96,6 @@ void doit(int fd){
 }*/
 
 void read_requesthdrs(rio_t *rp,char * userAgent){
-    printf("here is read_requesthdrs\n");
     char buf[MAXLINE];
 
     Rio_readlineb(rp, buf, MAXLINE);
