@@ -7,11 +7,17 @@ void delete(CacheList* list,CacheNode* node);
 CacheList * initCache(){
     CacheList* return_p = NULL;
     return_p = (CacheList*)Malloc(sizeof (CacheList));
+    return_p->frontNode = NULL;
+    return_p->rearNode = NULL;
+    return_p->currentElementCount = 0;
     return return_p;
 }
 
 char* findCacheNode(CacheList* list,char* url){
     printf("here is findCacheNode()\n");
+    if (list->currentElementCount == 0) {
+        return NULL;
+    }
     CacheNode* currentNode = list->frontNode;
     for (int i = 0; i < list->currentElementCount; ++i) {
         //cache hit
