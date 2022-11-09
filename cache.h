@@ -8,7 +8,7 @@
 
 #define MAX_CACHE_SIZE      1049000
 #define MAX_OBJECT_SIZE     102400
-#define MAX_CACHE_COUNT      10
+#define MAX_CACHE_COUNT     10
 
 typedef struct CacheNodeType{
     char url[MAX_OBJECT_SIZE];//별자

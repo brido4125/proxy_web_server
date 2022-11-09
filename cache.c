@@ -36,6 +36,7 @@ char* findCacheNode(CacheList* list,char* url){
 }
 
 void insertCacheNode(CacheList *list, char *url,char* response) {
+    printf("=======insertCacheNode Start=======\n");
     CacheNode *newNode = NULL;
     if (list != NULL) {
         newNode = (CacheNode *) Malloc(sizeof(CacheNode));
@@ -47,6 +48,7 @@ void insertCacheNode(CacheList *list, char *url,char* response) {
         }
         push(list, newNode);
     }
+    printf("=======insertCacheNode end=======\n");
 }
 
 CacheNode* pop(CacheList *list) {
@@ -58,6 +60,7 @@ CacheNode* pop(CacheList *list) {
 }
 
 void push(CacheList* list,CacheNode* node){
+    printf("=======push Start=======\n");
     if (list->currentElementCount == 0) {
         list->frontNode = node;
         node->prev = NULL;
@@ -68,7 +71,7 @@ void push(CacheList* list,CacheNode* node){
     node->prev = NULL;
     list->frontNode = node;
     list->currentElementCount++;
-
+    printf("=======push End=======\n");
 }
 
 void delete(CacheList* list,CacheNode* node){
