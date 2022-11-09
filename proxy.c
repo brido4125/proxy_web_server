@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "csapp.h"
 #include "sbuf.h"
+#include "cache.h"
 /* Recommended max cache and object sizes */
 #define MAX_CACHE_SIZE 1049000
 #define MAX_OBJECT_SIZE 102400
@@ -20,6 +21,7 @@ void parsingHeader(char* uri,char* host,char* port,char* filename);
 void* thread(void* vargp);
 
 sbuf_t sbuf; //
+static CacheList* cacheList;
 
 int main(int argc, char **argv)
 {
@@ -28,6 +30,7 @@ int main(int argc, char **argv)
     socklen_t clientlen;
     struct sockaddr_storage clientaddr;
     pthread_t tid;
+    cacheList = initCache();
     if (argc != 2) // 에러검출
     {
         fprintf(stderr, "usage: %s <port>\n", argv[0]);
@@ -67,7 +70,7 @@ void doit(int fd)
     rio_t client_rio,server_rio;
 
     Rio_readinitb(&client_rio, fd);
-    Rio_readlineb(&client_rio, buf, MAXLINE);
+    Rio_readlineb(&client_rio, buf, MAXLINE);//요청 헤더를 읽음
     printf("Request headers:\n");
     printf("%s\n", buf);
     sscanf(buf, "%s %s %s", method, uri, version);
@@ -81,16 +84,28 @@ void doit(int fd)
         return;
     }
 
+    printf("=======Receive Request From Client=======\n");
+    read_requesthdrs(&client_rio);
+
+    /*
+     * 여기서 캐시에 데이터가 있으면 리턴
+     * 요청 헤더의 파싱된 값들을 통해서 캐시 블록을 insert
+     * */
+    //insertCacheNode(cacheList,)
+    printf("url : %s \n", url);
+    printf("port : %s \n", port);
+    printf("host : %s \n", host);
+    printf("filename : %s \n", filename);
     int ptsfd = Open_clientfd(host, port);
     Rio_readinitb(&server_rio, ptsfd);
 
-    printf("=======Receive Request From Client=======\n");
-    read_requesthdrs(&client_rio);
     printf("=======Send Request To Server=======\n");
     make_request_to_server(ptsfd,url, host, port, method, version, filename);
-    printf("=======Receive Request To Server=======\n");
+
+    printf("=======Receive Request From Server=======\n");
     Rio_readnb(&server_rio, response, MAX_OBJECT_SIZE);
     printf("%s", response);
+
     printf("=======Send Response To Client=======\n");
     Rio_writen(fd, response, MAX_OBJECT_SIZE);
     printf("%s", response);
@@ -153,8 +168,8 @@ void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* m
     printf("%s", buf);
 }
 /*
-GET http://3.36.100.14:5000 HTTP/1.0
-Host:3.36.100.14:1234
+GET http://3.36.100.140:5000 HTTP/1.0
+Host:3.36.100.140:1234
 User-Agent: "Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3"
 Connection: keep
 Proxy-Connection: keep
