@@ -49,6 +49,7 @@ int main(int argc, char **argv)
         printf("Accepted connection from (%s, %s)\n", hostname, port);
         sbuf_insert(&sbuf, connfd);
     }
+    deleteCache(cacheList);
 }
 
 void* thread(void* vargp){
@@ -91,25 +92,25 @@ void doit(int fd)
      * 여기서 캐시에 데이터가 있으면 리턴
      * 요청 헤더의 파싱된 값들을 통해서 캐시 블록을 insert
      * */
-    //insertCacheNode(cacheList,)
-    printf("url : %s \n", url);
-    printf("port : %s \n", port);
-    printf("host : %s \n", host);
-    printf("filename : %s \n", filename);
-    int ptsfd = Open_clientfd(host, port);
-    Rio_readinitb(&server_rio, ptsfd);
+    if (strcpy(response,findCacheNode(cacheList, url)) != NULL) {
+        Rio_writen(fd, response, MAX_OBJECT_SIZE);
+        return;
+    }
+    int serverFd = Open_clientfd(host, port);
+    Rio_readinitb(&server_rio, serverFd);
 
     printf("=======Send Request To Server=======\n");
-    make_request_to_server(ptsfd,url, host, port, method, version, filename);
+    make_request_to_server(serverFd, url, host, port, method, version, filename);
 
     printf("=======Receive Request From Server=======\n");
     Rio_readnb(&server_rio, response, MAX_OBJECT_SIZE);
+    insertCacheNode(cacheList, url, response);
     printf("%s", response);
 
     printf("=======Send Response To Client=======\n");
     Rio_writen(fd, response, MAX_OBJECT_SIZE);
     printf("%s", response);
-    Close(ptsfd);
+    Close(serverFd);
 }
 
 void parsingHeader(char* uri,char* host,char* port,char* filename){
