@@ -32,15 +32,11 @@ int main(int argc, char **argv)
     while (1)
     {
         clientlen = sizeof(clientaddr);
-        // Accept 실행 > 연결 받음 > 트랜잭션 수행 > 연결 닫음. (계속해서 반복)
-        // accept함수를 통해 연결 요청한 clientfd와 연결
         connfd = Malloc(sizeof (int));
         *connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
         //Getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
         //printf("Accepted connection from (%s, %s)\n", hostname, port);
         Pthread_create(&tid, NULL, thread, connfd);
-        doit(connfd);
-        Close(connfd);
     }
 }
 
