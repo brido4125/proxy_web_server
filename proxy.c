@@ -97,6 +97,7 @@ void doit(int fd)
         Rio_writen(fd, response, MAX_OBJECT_SIZE);
         return;
     }
+    printf("After find Node.\n");
     int serverFd = Open_clientfd(host, port);
     Rio_readinitb(&server_rio, serverFd);
 
