@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include "csapp.h"
+#include "sbuf.h"
 /* Recommended max cache and object sizes */
 #define MAX_CACHE_SIZE 1049000
 #define MAX_OBJECT_SIZE 102400
+#define NTHREADS    4
+#define SBUFSIZE    16
+
 /* You won't lose style points for including this long line in your code */
 static const char *user_agent_hdr =
         "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 "
@@ -14,6 +18,8 @@ void read_requesthdrs(rio_t *rp);
 void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* method, char* version, char* filename);
 void parsingHeader(char* uri,char* host,char* port,char* filename);
 void* thread(void* vargp);
+
+sbuf_t sbuf; //
 
 int main(int argc, char **argv)
 {
@@ -28,7 +34,10 @@ int main(int argc, char **argv)
         exit(1);
     }
     listenfd = Open_listenfd(argv[1]);
-
+    sbuf_init(&sbuf, SBUFSIZE);
+    for (int i = 0; i < NTHREADS; i++) {
+        Pthread_create(&tid, NULL, thread, NULL);
+    }
     while (1)
     {
         clientlen = sizeof(clientaddr);
@@ -36,22 +45,23 @@ int main(int argc, char **argv)
         *connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
         //Getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
         //printf("Accepted connection from (%s, %s)\n", hostname, port);
-        Pthread_create(&tid, NULL, thread, connfd);
+        //Pthread_create(&tid, NULL, thread, connfd);
+        sbuf_insert(&sbuf, connfd);
     }
 }
 
 void* thread(void* vargp){
-    int connfd = *((int *) vargp);
+    //int connfd = *((int *) vargp);
     Pthread_detach(pthread_self());
-    Free(vargp);
-    doit(connfd);
-    Close(connfd);
-    return NULL;
+    while (1){
+        int connfd = sbuf_remove(&sbuf);
+        doit(connfd);
+        Close(connfd);
+    }
 }
 void doit(int fd)
 {
     // 프록시는 get요청만 받으면 됨. 정적인지 동적인지 몰라도됨 서버입장에서 프록시는 클라이언트 임. is_static 필요X
-    struct stat sbuf; // (필요함? 일단 가져옴)
     // sbuf 에 메타데이터 정보가 저장됨 (필요함)
     //
     char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], url[MAXLINE], version[MAXLINE], port[MAXLINE], host[MAXLINE], filename[MAXLINE];
