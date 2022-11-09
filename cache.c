@@ -11,6 +11,7 @@ CacheList * initCache(){
 }
 
 char* findCacheNode(CacheList* list,char* url){
+    printf("here is findCacheNode()\n");
     CacheNode* currentNode = list->frontNode;
     for (int i = 0; i < list->currentElementCount; ++i) {
         //cache hit
