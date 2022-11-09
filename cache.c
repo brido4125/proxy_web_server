@@ -64,6 +64,7 @@ void push(CacheList* list,CacheNode* node){
     if (list->currentElementCount == 0) {
         list->frontNode = node;
         node->prev = NULL;
+        list->currentElementCount++;
         return;
     }
     list->frontNode->prev = node;
