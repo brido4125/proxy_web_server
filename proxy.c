@@ -13,36 +13,44 @@ void doit(int fd);
 void read_requesthdrs(rio_t *rp);
 void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* method, char* version, char* filename);
 void parsingHeader(char* uri,char* host,char* port,char* filename);
+void* thread(void* vargp);
 
 int main(int argc, char **argv)
 {
-    int listenfd, connfd; // 듣기소켓, 연결소켓 받아오기
+    int listenfd, *connfd; // 듣기소켓, 연결소켓 받아오기
     char hostname[MAXLINE], port[MAXLINE];
     socklen_t clientlen;
     struct sockaddr_storage clientaddr;
+    pthread_t tid;
     if (argc != 2) // 에러검출
     {
         fprintf(stderr, "usage: %s <port>\n", argv[0]);
         exit(1);
     }
     listenfd = Open_listenfd(argv[1]);
-    //proxy_port = argv[1];
 
     while (1)
     {
         clientlen = sizeof(clientaddr);
         // Accept 실행 > 연결 받음 > 트랜잭션 수행 > 연결 닫음. (계속해서 반복)
         // accept함수를 통해 연결 요청한 clientfd와 연결
-        connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
-        // Getnameinfo : ip 주소를 도메인주소로 바꿔줌
-        Getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
-        printf("Accepted connection from (%s, %s)\n", hostname, port);
-        // client에서 받은 요청을 처리하는 doit 함수 진행
-        //  한 개의 HTTP 트랜잭션을 처리
-        //  요청 받은 데이터를 클라이언트에게 보내줌
+        connfd = Malloc(sizeof (int));
+        *connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
+        //Getnameinfo((SA *)&clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
+        //printf("Accepted connection from (%s, %s)\n", hostname, port);
+        Pthread_create(&tid, NULL, thread, connfd);
         doit(connfd);
         Close(connfd);
     }
+}
+
+void* thread(void* vargp){
+    int connfd = *((int *) vargp);
+    Pthread_detach(pthread_self());
+    Free(vargp);
+    doit(connfd);
+    Close(connfd);
+    return NULL;
 }
 void doit(int fd)
 {
