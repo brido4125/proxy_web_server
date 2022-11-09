@@ -95,10 +95,10 @@ void doit(int fd)
     printf("findCacheReturn : %s \n", findCacheNode(cacheList, url));
     char* ret = findCacheNode(cacheList, url);
     printf("ret = %s \n", ret);
-    if(strcmp(ret,"") != 0) {
+    /*if(strcmp(ret,"") != 0) {
         Rio_writen(fd, response, MAX_OBJECT_SIZE);
         return;
-    }
+    }*/
     printf("After find Node.\n");
     int serverFd = Open_clientfd(host, port);
     Rio_readinitb(&server_rio, serverFd);
