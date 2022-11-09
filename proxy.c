@@ -102,7 +102,7 @@ void doit(int fd)
     Rio_readinitb(&server_rio, serverFd);
 
     printf("=======Send Request To Server=======\n");
-    make_request_to_server(serverFd, url, host, port, method, version, filename);
+    make_request_to_server(serverFd, uri, host, port, method, version, filename);
 
     printf("=======Receive Request From Server=======\n");
     Rio_readnb(&server_rio, response, MAX_OBJECT_SIZE);
@@ -165,7 +165,6 @@ void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* m
         strcpy(url, "/");
         strcat(url, filename);
     }
-    //printf("url : %s \n", url);
     sprintf(buf, "%s %s %s\r\n", method, url, version);
     sprintf(buf, "%sHost: %s:%s\r\n", buf, host, port);
     sprintf(buf, "%s%s", buf, user_agent_hdr);
