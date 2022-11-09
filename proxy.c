@@ -93,11 +93,12 @@ void doit(int fd)
      * 요청 헤더의 파싱된 값들을 통해서 캐시 블록을 insert
      * */
     printf("findCacheReturn : %s \n", findCacheNode(cacheList, url));
-    strcpy(response,findCacheNode(cacheList, url));
-    if(strcmp(response,"") == 0) {
+    char* ret = findCacheNode(cacheList, url);
+    printf("ret = %s \n", ret);
+    /*if(strcmp(ret,"") != 0) {
         Rio_writen(fd, response, MAX_OBJECT_SIZE);
         return;
-    }
+    }*/
     printf("After find Node.\n");
     int serverFd = Open_clientfd(host, port);
     Rio_readinitb(&server_rio, serverFd);
