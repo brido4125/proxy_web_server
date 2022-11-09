@@ -92,9 +92,9 @@ void doit(int fd)
      * 여기서 캐시에 데이터가 있으면 리턴
      * 요청 헤더의 파싱된 값들을 통해서 캐시 블록을 insert
      * */
-    printf("findCacheReturn : %s \n", findCacheNode(cacheList, url));
-    char* ret = findCacheNode(cacheList, url);
-    printf("ret = %s \n", ret);
+//    printf("findCacheReturn : %s \n", findCacheNode(cacheList, url));
+//    char* ret = findCacheNode(cacheList, url);
+//    printf("ret = %s \n", ret);
     /*if(strcmp(ret,"") != 0) {
         Rio_writen(fd, response, MAX_OBJECT_SIZE);
         return;
@@ -109,6 +109,7 @@ void doit(int fd)
     printf("=======Receive Request From Server=======\n");
     Rio_readnb(&server_rio, response, MAX_OBJECT_SIZE);
     insertCacheNode(cacheList, url, response);
+    printf("=======after insert cache node=======\n list_length = %d\n list = %p\n", cacheList->currentElementCount, cacheList->frontNode);
     printf("%s", response);
 
     printf("=======Send Response To Client=======\n");
