@@ -21,6 +21,7 @@ void* thread(void* vargp);
 
 sbuf_t sbuf;
 static CacheList* cacheList;
+static sem_t mutex;
 
 int main(int argc, char **argv)
 {
@@ -86,7 +87,9 @@ void doit(int fd)
      * 여기서 캐시에 데이터가 있으면 리턴
      * 캐시 미스일 경우,요청 헤더의 파싱된 값들을 통해서 캐시 블록을 insert
      * */
+    P(&mutex);
     char* ret = findCacheNode(cacheList, url);
+    V(&mutex);
     if (ret != NULL) {
         printf("=======Receive Request is In Cache=======\n");
         Rio_writen(fd, ret, MAX_OBJECT_SIZE);
@@ -103,7 +106,9 @@ void doit(int fd)
     Rio_readnb(&server_rio, response, MAX_OBJECT_SIZE);
 
     printf("=======Saved Data to Cache=======\n");
+    P(&mutex);
     insertCacheNode(cacheList, url, response);
+    V(&mutex);
     printf("%s", response);
     printf("=======Send Response To Client=======\n");
     Rio_writen(fd, response, MAX_OBJECT_SIZE);
