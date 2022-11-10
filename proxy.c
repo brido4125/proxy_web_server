@@ -12,7 +12,6 @@
 static const char *user_agent_hdr =
         "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 "
         "Firefox/10.0.3\r\n";
-//static const char *proxy_port;
 
 void doit(int fd);
 void read_requesthdrs(rio_t *rp);
@@ -20,7 +19,7 @@ void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* m
 void parsingHeader(char* uri,char* host,char* port,char* filename);
 void* thread(void* vargp);
 
-sbuf_t sbuf; //
+sbuf_t sbuf;
 static CacheList* cacheList;
 
 int main(int argc, char **argv)
@@ -49,11 +48,9 @@ int main(int argc, char **argv)
         printf("Accepted connection from (%s, %s)\n", hostname, port);
         sbuf_insert(&sbuf, connfd);
     }
-    deleteCache(cacheList);
 }
 
 void* thread(void* vargp){
-    //int connfd = *((int *) vargp);
     Pthread_detach(pthread_self());
     while (1){
         int connfd = sbuf_remove(&sbuf);
@@ -63,9 +60,6 @@ void* thread(void* vargp){
 }
 void doit(int fd)
 {
-    // 프록시는 get요청만 받으면 됨. 정적인지 동적인지 몰라도됨 서버입장에서 프록시는 클라이언트 임. is_static 필요X
-    // sbuf 에 메타데이터 정보가 저장됨 (필요함)
-    //
     char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], url[MAXLINE], version[MAXLINE], port[MAXLINE], host[MAXLINE], filename[MAXLINE];
     char response[MAX_OBJECT_SIZE];
     rio_t client_rio,server_rio;
@@ -90,7 +84,7 @@ void doit(int fd)
 
     /*
      * 여기서 캐시에 데이터가 있으면 리턴
-     * 요청 헤더의 파싱된 값들을 통해서 캐시 블록을 insert
+     * 캐시 미스일 경우,요청 헤더의 파싱된 값들을 통해서 캐시 블록을 insert
      * */
     char* ret = findCacheNode(cacheList, url);
     if (ret != NULL) {
@@ -107,12 +101,9 @@ void doit(int fd)
 
     printf("=======Receive Request From Server=======\n");
     Rio_readnb(&server_rio, response, MAX_OBJECT_SIZE);
+
     printf("=======Saved Data to Cache=======\n");
-    printf("Before insert Current Cache Number : %d\n", cacheList->currentElementCount);
-    printf("Before insert Current Front : %p\n", cacheList->frontNode);
     insertCacheNode(cacheList, url, response);
-    printf("After insert Current Cache Number : %d\n", cacheList->currentElementCount);
-    printf("After insert Current Front : %p\n", cacheList->frontNode);
     printf("%s", response);
     printf("=======Send Response To Client=======\n");
     Rio_writen(fd, response, MAX_OBJECT_SIZE);
@@ -120,6 +111,9 @@ void doit(int fd)
     Close(serverFd);
 }
 
+/*
+ * Client로부터 받은 HTTP 요청 시작줄을 파싱해서 데이터 얻음
+ * */
 void parsingHeader(char* uri,char* host,char* port,char* filename){
     char *p;
 
@@ -174,10 +168,3 @@ void make_request_to_server(int ptsfd,char* url, char* host, char* port, char* m
     Rio_writen(ptsfd, buf, strlen(buf));
     printf("%s", buf);
 }
-/*
-GET http://3.36.100.140:5000 HTTP/1.0
-Host:3.36.100.140:1234
-User-Agent: "Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3"
-Connection: keep
-Proxy-Connection: keep
-*/
